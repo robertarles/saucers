@@ -36,6 +36,22 @@ fn main() {
                 .help("max number of jobs to return")
             )
         )
+        .subcommand(SubCommand::with_name("assetfile")
+            .about("Get a list of job data.")
+            .arg(Arg::with_name("filename")
+                .short("f")
+                .takes_value(true)
+                .required(true)
+                .default_value("10")
+                .help("name of job asset file to return")
+            )
+            .arg(Arg::with_name("id")
+                .short("i")
+                .takes_value(true)
+                .required(true)
+                .help("job ID")
+            )
+        )
         .get_matches();
     
     match matches.subcommand_name() {
@@ -44,6 +60,12 @@ fn main() {
             let job_args = matches.subcommand_matches("job").unwrap();
             let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
             get_job(&job_id[..])
+        },
+        Some("assetfile") => {
+            let job_args = matches.subcommand_matches("assetfile").unwrap();
+            let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
+            let asset_filename = job_args.value_of("filename").unwrap(); // required arg, safe to simply unwrap
+            get_job_asset_file(&job_id[..], &asset_filename[..])
         },
         Some("jobs") => {
             // set a default 'max'
@@ -106,4 +128,22 @@ fn get_job(job_id: &str) {
     let body = resp.text().unwrap();
     let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
     println!("{}", json);
+}
+
+fn get_job_asset_file(job_id: &str, asset_filename: &str) {
+    
+    let sauce_username = env::var("SAUCE_USERNAME").unwrap();
+    let sauce_access_key = env::var("SAUCE_ACCESS_KEY").unwrap();
+    
+    // TODO: alter from get_jobs() code to get_job()
+    // TODO: handle job ID param
+    // TODO: ensure url is correct
+    
+    let client = reqwest::blocking::Client::new();
+    let resp = client
+        .get(&format!("{}{}/jobs/{}/assets/{}", &SAUCE_API_URL, &sauce_username, &job_id, &asset_filename))
+        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .send().unwrap();
+    let body = resp.text().unwrap();
+    println!("{}", body);
 }
