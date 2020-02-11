@@ -17,9 +17,9 @@ fn main() {
     // handle the CLI args
     let matches = App::new("args")
         .subcommand(SubCommand::with_name("apistatus")
-            .about("Get the current API status."))
+            .about("Get the current saucelabs API status."))
         .subcommand(SubCommand::with_name("job")
-            .about("Get job data.")
+            .about("Get data about a particular job ID.")
             .arg(Arg::with_name("id")
                 .short("i")
                 .takes_value(true)
@@ -28,7 +28,7 @@ fn main() {
             )
         )
         .subcommand(SubCommand::with_name("jobs")
-            .about("Get a list of job data.")
+            .about("Get a list of jobs data.")
             .arg(Arg::with_name("max")
                 .short("m")
                 .takes_value(true)
@@ -37,13 +37,13 @@ fn main() {
             )
         )
         .subcommand(SubCommand::with_name("assetfile")
-            .about("Get a list of job data.")
+            .about("Get a file asset associated with a particular job ID. (logs, screenshots, etc.) See the 'assetlist' subcommand.")
             .arg(Arg::with_name("filename")
                 .short("f")
                 .takes_value(true)
                 .required(true)
                 .default_value("10")
-                .help("name of job asset file to return")
+                .help("name of asset file to return")
             )
             .arg(Arg::with_name("id")
                 .short("i")
@@ -53,7 +53,7 @@ fn main() {
             )
         )
         .subcommand(SubCommand::with_name("assetlist")
-            .about("Get a list of assets for a job.")
+            .about("Get the asset list associated with a particular job ID")
             .arg(Arg::with_name("id")
                 .short("i")
                 .takes_value(true)
@@ -97,6 +97,9 @@ fn main() {
 
 }
 
+/**
+ * returns the "healthcheck" api status from Saucelabs API
+ */
 fn get_api_status()  {
 
     let resp = reqwest::blocking::get(&format!("{}{}", &SAUCE_API_URL, &API_STATUS_PATH)).unwrap();
@@ -109,6 +112,9 @@ fn get_api_status()  {
 
 }
 
+/**
+ * return a list of jobs
+ */
 fn get_jobs(max: &str) {
     
     let sauce_username = env::var("SAUCE_USERNAME").unwrap();
@@ -125,14 +131,13 @@ fn get_jobs(max: &str) {
     println!("{}", json);
 }
 
+/**
+ * get a specific jobs details
+ */
 fn get_job(job_id: &str) {
     
     let sauce_username = env::var("SAUCE_USERNAME").unwrap();
     let sauce_access_key = env::var("SAUCE_ACCESS_KEY").unwrap();
-    
-    // TODO: alter from get_jobs() code to get_job()
-    // TODO: handle job ID param
-    // TODO: ensure url is correct
     
     let client = reqwest::blocking::Client::new();
     let resp = client
@@ -164,7 +169,9 @@ fn get_job_asset_file(job_id: &str, asset_filename: &str) {
     println!("{}", body);
 }
 
-
+/**
+ * get the asset list associated with a particular job ID
+ */
 fn get_job_asset_list(job_id: &str) {
     
     // apiURL+"/"+username+"/jobs/"+jobID+"/assets
