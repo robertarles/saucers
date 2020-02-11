@@ -49,7 +49,16 @@ fn main() {
                 .short("i")
                 .takes_value(true)
                 .required(true)
-                .help("job ID")
+                .help("ID of the job")
+            )
+        )
+        .subcommand(SubCommand::with_name("assetlist")
+            .about("Get a list of assets for a job.")
+            .arg(Arg::with_name("id")
+                .short("i")
+                .takes_value(true)
+                .required(true)
+                .help("ID of the job")
             )
         )
         .get_matches();
@@ -66,6 +75,11 @@ fn main() {
             let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
             let asset_filename = job_args.value_of("filename").unwrap(); // required arg, safe to simply unwrap
             get_job_asset_file(&job_id[..], &asset_filename[..])
+        },
+        Some("assetlist") => {
+            let job_args = matches.subcommand_matches("assetlist").unwrap();
+            let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
+            get_job_asset_list(&job_id[..])
         },
         Some("jobs") => {
             // set a default 'max'
@@ -130,18 +144,36 @@ fn get_job(job_id: &str) {
     println!("{}", json);
 }
 
+
+/**
+ * get a particular job asset file, valid file names:
+ * from their docs (I believe they are not correct/incomplete, at least the 'selenium host log?' is missing, there is another log file)
+ *  selenium-server.log, video.mp4, XXXXscreenshot.png (where XXXX is a number between 0000 and 9999), final_screenshot.png
+ */
 fn get_job_asset_file(job_id: &str, asset_filename: &str) {
     
     let sauce_username = env::var("SAUCE_USERNAME").unwrap();
     let sauce_access_key = env::var("SAUCE_ACCESS_KEY").unwrap();
     
-    // TODO: alter from get_jobs() code to get_job()
-    // TODO: handle job ID param
-    // TODO: ensure url is correct
-    
     let client = reqwest::blocking::Client::new();
     let resp = client
         .get(&format!("{}{}/jobs/{}/assets/{}", &SAUCE_API_URL, &sauce_username, &job_id, &asset_filename))
+        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .send().unwrap();
+    let body = resp.text().unwrap();
+    println!("{}", body);
+}
+
+
+fn get_job_asset_list(job_id: &str) {
+    
+    // apiURL+"/"+username+"/jobs/"+jobID+"/assets
+    let sauce_username = env::var("SAUCE_USERNAME").unwrap();
+    let sauce_access_key = env::var("SAUCE_ACCESS_KEY").unwrap();
+    
+    let client = reqwest::blocking::Client::new();
+    let resp = client
+        .get(&format!("{}{}/jobs/{}/assets", &SAUCE_API_URL, &sauce_username, &job_id))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .send().unwrap();
     let body = resp.text().unwrap();
