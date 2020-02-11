@@ -1,16 +1,9 @@
+mod api_client;
+
 extern crate clap;
 use clap::{Arg, App, SubCommand};
-extern crate reqwest;
 // use reqwest::Client;
 // use futures::executor::block_on;
-extern crate serde;
-extern crate serde_json;
-use std::env;
-
-static SAUCE_API_URL: &'static str = "https://saucelabs.com/rest/v1/";
-static API_STATUS_PATH: &'static str = "info/status";
-static GET_JOBS_PATH: &'static str = "/jobs";
-static GET_JOB_PATH: &'static str = "/jobs";
 
 fn main() {
 
@@ -63,23 +56,24 @@ fn main() {
         )
         .get_matches();
     
+    // select the subcommand to run
     match matches.subcommand_name() {
-        Some("apistatus") => get_api_status(),
+        Some("apistatus") => api_client::get_api_status(),
         Some("job") => {
             let job_args = matches.subcommand_matches("job").unwrap();
             let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
-            get_job(&job_id[..])
+            api_client::get_job(&job_id[..])
         },
         Some("assetfile") => {
             let job_args = matches.subcommand_matches("assetfile").unwrap();
             let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
             let asset_filename = job_args.value_of("filename").unwrap(); // required arg, safe to simply unwrap
-            get_job_asset_file(&job_id[..], &asset_filename[..])
+            api_client::get_job_asset_file(&job_id[..], &asset_filename[..])
         },
         Some("assetlist") => {
             let job_args = matches.subcommand_matches("assetlist").unwrap();
             let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
-            get_job_asset_list(&job_id[..])
+            api_client::get_job_asset_list(&job_id[..])
         },
         Some("jobs") => {
             // set a default 'max'
@@ -89,100 +83,10 @@ fn main() {
             if jobs_args.is_present("max") {
                 max = jobs_args.value_of("max").unwrap().to_string();
             };
-            get_jobs(&max[..])
+            api_client::get_jobs(&max[..])
         },
         None => println!("No subcommand was used"),
         _ => println!("Subcommand not implemented!"),
     }
 
-}
-
-/**
- * returns the "healthcheck" api status from Saucelabs API
- */
-fn get_api_status()  {
-
-    let resp = reqwest::blocking::get(&format!("{}{}", &SAUCE_API_URL, &API_STATUS_PATH)).unwrap();
-    //println!("API response: \n{:?}", resp.status());
-
-    let body = resp.text().unwrap();
-    let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
-
-    println!("{}", json);
-
-}
-
-/**
- * return a list of jobs
- */
-fn get_jobs(max: &str) {
-    
-    let sauce_username = env::var("SAUCE_USERNAME").unwrap();
-    let sauce_access_key = env::var("SAUCE_ACCESS_KEY").unwrap();
-    
-    let jobs_params = format!("?limit={}&full=true", max);
-    let client = reqwest::blocking::Client::new();
-    let resp = client
-        .get(&format!("{}{}{}", &SAUCE_API_URL, &GET_JOBS_PATH, &jobs_params))
-        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
-        .send().unwrap();
-    let body = resp.text().unwrap();
-    let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
-    println!("{}", json);
-}
-
-/**
- * get a specific jobs details
- */
-fn get_job(job_id: &str) {
-    
-    let sauce_username = env::var("SAUCE_USERNAME").unwrap();
-    let sauce_access_key = env::var("SAUCE_ACCESS_KEY").unwrap();
-    
-    let client = reqwest::blocking::Client::new();
-    let resp = client
-        .get(&format!("{}{}/{}", &SAUCE_API_URL, &GET_JOB_PATH, &job_id))
-        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
-        .send().unwrap();
-    let body = resp.text().unwrap();
-    let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
-    println!("{}", json);
-}
-
-
-/**
- * get a particular job asset file, valid file names:
- * from their docs (I believe they are not correct/incomplete, at least the 'selenium host log?' is missing, there is another log file)
- *  selenium-server.log, video.mp4, XXXXscreenshot.png (where XXXX is a number between 0000 and 9999), final_screenshot.png
- */
-fn get_job_asset_file(job_id: &str, asset_filename: &str) {
-    
-    let sauce_username = env::var("SAUCE_USERNAME").unwrap();
-    let sauce_access_key = env::var("SAUCE_ACCESS_KEY").unwrap();
-    
-    let client = reqwest::blocking::Client::new();
-    let resp = client
-        .get(&format!("{}{}/jobs/{}/assets/{}", &SAUCE_API_URL, &sauce_username, &job_id, &asset_filename))
-        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
-        .send().unwrap();
-    let body = resp.text().unwrap();
-    println!("{}", body);
-}
-
-/**
- * get the asset list associated with a particular job ID
- */
-fn get_job_asset_list(job_id: &str) {
-    
-    // apiURL+"/"+username+"/jobs/"+jobID+"/assets
-    let sauce_username = env::var("SAUCE_USERNAME").unwrap();
-    let sauce_access_key = env::var("SAUCE_ACCESS_KEY").unwrap();
-    
-    let client = reqwest::blocking::Client::new();
-    let resp = client
-        .get(&format!("{}{}/jobs/{}/assets", &SAUCE_API_URL, &sauce_username, &job_id))
-        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
-        .send().unwrap();
-    let body = resp.text().unwrap();
-    println!("{}", body);
 }
