@@ -11,7 +11,14 @@ fn main() {
     // handle the CLI args
     let matches = App::new("args")
         .subcommand(SubCommand::with_name("apistatus")
-            .about("Get the current saucelabs API status."))
+            .about("Get the current saucelabs API status.")
+            .arg(Arg::with_name("formatted")
+                .short("o")
+                .takes_value(true)
+                .required(false)
+                .help("Request output in columnar format, requires field names to include in table (e.g. \"id,status,passed\")")
+            )
+        )
         .subcommand(SubCommand::with_name("job")
             .about("Get data about a particular job ID.")
             .arg(Arg::with_name("id")
@@ -78,7 +85,8 @@ fn main() {
     // select the subcommand to run
     match matches.subcommand_name() {
         Some("apistatus") => {
-            api_client::get_api_status();
+            let job_args = matches.subcommand_matches("apistatus").unwrap();
+            call_get_api_status(job_args);
         },
         Some("job") => {
             let job_args = matches.subcommand_matches("job").unwrap();
@@ -101,6 +109,17 @@ fn main() {
         _ => println!("Subcommand not implemented!"),
     }
 
+    fn call_get_api_status(job_args: &clap::ArgMatches){
+        let json_response = api_client::get_api_status();
+        if job_args.is_present("formatted") {
+            let format_fields_string = job_args.value_of("formatted").unwrap();
+            let format_fields_string_cleaned = format_fields_string.replace(" ","");
+            let format_fields = format_fields_string_cleaned.split(",").collect();
+            print_formatted(json_response, format_fields);
+        } else {
+            println!("{}", json_response);
+        }
+    }
 
     fn call_get_jobs(job_args: &clap::ArgMatches){
         // set a default 'max'
