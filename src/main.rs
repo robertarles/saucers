@@ -66,6 +66,12 @@ fn main() {
                 .required(true)
                 .help("ID of the job")
             )
+            .arg(Arg::with_name("formatted")
+                .short("o")
+                .takes_value(true)
+                .required(false)
+                .help("Request output in columnar format, requires field names to include in table (e.g. \"id,status,passed\")")
+            )
         )
         .get_matches();
     
@@ -125,6 +131,28 @@ fn main() {
             println!("{}", json_response);
         }
     }
+
+    fn call_get_job_asset_file(job_args: &clap::ArgMatches){
+        let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
+        let asset_filename = job_args.value_of("filename").unwrap(); // required arg, safe to simply unwrap
+        let text_response = api_client::get_job_asset_file(&job_id[..], &asset_filename[..]);
+        println!("{}", text_response);
+    }
+
+    fn call_get_job_asset_list(job_args: &clap::ArgMatches){
+        let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
+        let json_response = api_client::get_job_asset_list(&job_id[..]);
+        if job_args.is_present("formatted") {
+            let format_fields_string = job_args.value_of("formatted").unwrap();
+            let format_fields_string_cleaned = format_fields_string.replace(" ","");
+            let format_fields = format_fields_string_cleaned.split(",").collect();
+            print_formatted(json_response, format_fields);
+        } else {
+            println!("{}", json_response);
+        }
+    }
+
+
 
     fn print_formatted(json: serde_json::Value, field_names: Vec<&str>) {
         //println!("[DEBUG] passed to print_formatted(): {}\n{:#?}", json, field_names);
@@ -197,18 +225,5 @@ fn main() {
             println!();
         }
         println!();
-    }
-
-    fn call_get_job_asset_file(job_args: &clap::ArgMatches){
-        let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
-        let asset_filename = job_args.value_of("filename").unwrap(); // required arg, safe to simply unwrap
-        let text_response = api_client::get_job_asset_file(&job_id[..], &asset_filename[..]);
-        println!("{}", text_response);
-    }
-
-    fn call_get_job_asset_list(job_args: &clap::ArgMatches){
-        let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
-        let json_response = api_client::get_job_asset_list(&job_id[..]);
-        println!("{}", json_response);
     }
 }
