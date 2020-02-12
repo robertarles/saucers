@@ -35,6 +35,12 @@ fn main() {
                 .default_value("10")
                 .help("max number of jobs to return")
             )
+            .arg(Arg::with_name("formatted")
+                .short("o")
+                .takes_value(true)
+                .required(false)
+                .help("Request output in columnar format, requires field names to include in table (e.g. \"id,status,passed\")")
+            )
         )
         .subcommand(SubCommand::with_name("assetfile")
             .about("Get a file asset associated with a particular job ID. (logs, screenshots, etc.) See the 'assetlist' subcommand.")
@@ -89,6 +95,24 @@ fn main() {
         _ => println!("Subcommand not implemented!"),
     }
 
+
+    fn call_get_jobs(job_args: &clap::ArgMatches){
+        // set a default 'max'
+        let mut max = String::from("10");
+        if job_args.is_present("max") {
+            max = job_args.value_of("max").unwrap().to_string();
+        };
+        let json_response = api_client::get_jobs(&max[..]);
+        if job_args.is_present("formatted") {
+            let format_fields_string = job_args.value_of("formatted").unwrap();
+            let format_fields_string_cleaned = format_fields_string.replace(" ","");
+            let format_fields = format_fields_string_cleaned.split(",").collect();
+            print_formatted(json_response, format_fields);
+        } else {
+            println!("{}", json_response);
+        }
+    }
+
     fn call_get_job(job_args: &clap::ArgMatches){
         let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
         let json_response = api_client::get_job(&job_id[..]);
@@ -111,26 +135,31 @@ fn main() {
         }
         if json.is_array() {
             for json_item in json.as_array().unwrap().iter(){
-                println!("[DEBUG] json_item {:#?}", json_item);
+                let mut fields_map: std::collections::HashMap<String,String> = HashMap::new();
                 for field_name in &field_names {
-                    println!("{:#?}", field_name);
-                    //if json_item.as_object().unwrap().is_present(field_name){
-                        // put field_name value in VALUES map
-                        // /let mut fields_map: std::collections::HashMap<String,String> = HashMap::new();
-                        // if len > field_lens[field_name] then field_lens[fields] = field_name.len
-                    //}
+                    // println!("{:#?}", field_name);
+                    let json_object = json_item.as_object().unwrap();
+                    if json_object.contains_key(&field_name.to_string()) {
+                        let field_val = json_object.get(&field_name.to_string()).unwrap().to_string().replace("\"", "");
+                        fields_map.insert(field_name.to_string(), field_val);
+                        let current_val_len = json_object.get(&field_name.to_string()).unwrap().to_string().len();
+                        let record_len = field_lens.get(&field_name.to_string()).unwrap();
+                        if &current_val_len > record_len { 
+                            field_lens.insert(field_name.to_string(), current_val_len); 
+                        }
+                    }
+    
                 }
-                // place VALUES map on fields_map
+                field_vals_vec.push(fields_map);
             }
-        } else {   // else
+        } else {
+            let mut fields_map: std::collections::HashMap<String,String> = HashMap::new();
             for field_name in &field_names {
                 // println!("{:#?}", field_name);
-                let mut fields_map: std::collections::HashMap<String,String> = HashMap::new();
                 let json_object = json.as_object().unwrap();
                 if json_object.contains_key(&field_name.to_string()) {
-                    // println!("[DEBUG] json has key {}", &field_name.to_string());
-                    fields_map.insert(field_name.to_string(), json_object.get(&field_name.to_string()).unwrap().to_string());
-                    field_vals_vec.push(fields_map);
+                    let field_val = json_object.get(&field_name.to_string()).unwrap().to_string().replace("\"", "");
+                    fields_map.insert(field_name.to_string(), field_val);
                     let current_val_len = json_object.get(&field_name.to_string()).unwrap().to_string().len();
                     let record_len = field_lens.get(&field_name.to_string()).unwrap();
                     if &current_val_len > record_len { 
@@ -139,18 +168,35 @@ fn main() {
                 }
 
             }
-            println!("[DEBUG] field vals stored {:#?}", field_vals_vec);
-            println!("[DEBUG] field len records {:#?}", field_lens);
-            // place VALUES map on fields_map
+            field_vals_vec.push(fields_map);
         }
         // print table
-        // for field_name in field_names
-            //print("{:field_lens[field_name]+1}",field_name)
-        // println!("\n{:repeated sum of field name + num of field names}", "-")
+        for field_name in &field_names {
+            print!("{val:<width$}",width=field_lens[&field_name[..]]+1, val=field_name)
+        }
+        let mut sum_of_widths = 0;
+        for field in field_lens.iter() {
+            sum_of_widths += field.1;
+        }
+        // add the right-pad width
+        sum_of_widths += field_lens.len();
+        println!("\n{:->width$}", "-", width=sum_of_widths); //repeated sum of field name + num of field names
         // for each entry in fields_map
-            // for each field_name in field_names
-                // print("{:+repeated ${field_lens[field_name]-val.len} spaces}", val)
-            //println!()
+        for entry in field_vals_vec.iter() {
+            for field_name in &field_names {
+                //println!("[DEBUG] current vals_vec entry {:#?}, field_name {}", &entry, &field_name);
+                let record_width = field_lens[&field_name[..]];
+                // if field name from user is not in saucelabs returned object, print blank space in table
+                if entry.contains_key(&field_name[..]){
+                    let field_val: String = entry.get(&field_name[..]).unwrap().to_string();
+                    print!("{:<width$}", &field_val, width=record_width+1);
+                }else{
+                    print!("{:<width$}", "", width=record_width+1);
+                }
+            }
+            println!();
+        }
+        println!();
     }
 
     fn call_get_job_asset_file(job_args: &clap::ArgMatches){
@@ -163,16 +209,6 @@ fn main() {
     fn call_get_job_asset_list(job_args: &clap::ArgMatches){
         let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
         let json_response = api_client::get_job_asset_list(&job_id[..]);
-        println!("{}", json_response);
-    }
-
-    fn call_get_jobs(job_args: &clap::ArgMatches){
-        // set a default 'max'
-        let mut max = String::from("10");
-        if job_args.is_present("max") {
-            max = job_args.value_of("max").unwrap().to_string();
-        };
-        let json_response = api_client::get_jobs(&max[..]);
         println!("{}", json_response);
     }
 }
