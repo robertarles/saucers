@@ -34,6 +34,15 @@ fn main() {
                 .help("Request output in columnar format, requires field names to include in table (e.g. \"id,status,passed\")")
             )
         )
+        .subcommand(SubCommand::with_name("uploads")
+            .about("Get a list of files that have been uploaded to sauce storage.")
+            .arg(Arg::with_name("formatted")
+                .short("o")
+                .takes_value(true)
+                .required(false)
+                .help("Request output in columnar format, requires field names to include in table (e.g. \"id,status,passed\")")
+            )
+        )
         .subcommand(SubCommand::with_name("jobs")
             .about("Get a list of jobs data.")
             .arg(Arg::with_name("max")
@@ -101,12 +110,15 @@ fn main() {
             call_get_job_asset_list(job_args);
         },
         Some("jobs") => {
-            // get the args from the subcommand, if max is provided, use its val
             let job_args = matches.subcommand_matches("jobs").unwrap();
             call_get_jobs(job_args);
         },
-        None => println!("No subcommand was used"),
-        _ => println!("Subcommand not implemented!"),
+        Some("uploads") => {
+            let job_args = matches.subcommand_matches("uploads").unwrap();
+            call_get_uploads(job_args);
+        },
+        None => println!("No subcommand was used.\nUse --help for subcommand help."),
+        _ => println!("Subcommand not implemented!\nUse --help for subcommand help."),
     }
 
     fn call_get_api_status(job_args: &clap::ArgMatches){
@@ -115,7 +127,20 @@ fn main() {
             let format_fields_string = job_args.value_of("formatted").unwrap();
             let format_fields_string_cleaned = format_fields_string.replace(" ","");
             let format_fields = format_fields_string_cleaned.split(",").collect();
-            print_formatted(json_response, format_fields);
+            print_formatted(&json_response, format_fields);
+        } else {
+            println!("{}", json_response);
+        }
+    }
+
+    fn call_get_uploads(job_args: &clap::ArgMatches){
+        let json_response = api_client::get_uploads();
+        if job_args.is_present("formatted") {
+            let format_fields_string = job_args.value_of("formatted").unwrap();
+            let format_fields_string_cleaned = format_fields_string.replace(" ","");
+            let format_fields = format_fields_string_cleaned.split(",").collect();
+            let json_file_array = json_response.get("files").unwrap();
+            print_formatted(&json_file_array, format_fields);
         } else {
             println!("{}", json_response);
         }
@@ -132,7 +157,7 @@ fn main() {
             let format_fields_string = job_args.value_of("formatted").unwrap();
             let format_fields_string_cleaned = format_fields_string.replace(" ","");
             let format_fields = format_fields_string_cleaned.split(",").collect();
-            print_formatted(json_response, format_fields);
+            print_formatted(&json_response, format_fields);
         } else {
             println!("{}", json_response);
         }
@@ -145,7 +170,7 @@ fn main() {
             let format_fields_string = job_args.value_of("formatted").unwrap();
             let format_fields_string_cleaned = format_fields_string.replace(" ","");
             let format_fields = format_fields_string_cleaned.split(",").collect();
-            print_formatted(json_response, format_fields);
+            print_formatted(&json_response, format_fields);
         } else {
             println!("{}", json_response);
         }
@@ -165,7 +190,7 @@ fn main() {
             let format_fields_string = job_args.value_of("formatted").unwrap();
             let format_fields_string_cleaned = format_fields_string.replace(" ","");
             let format_fields = format_fields_string_cleaned.split(",").collect();
-            print_formatted(json_response, format_fields);
+            print_formatted(&json_response, format_fields);
         } else {
             println!("{}", json_response);
         }
@@ -173,7 +198,7 @@ fn main() {
 
 
 
-    fn print_formatted(json: serde_json::Value, field_names: Vec<&str>) {
+    fn print_formatted(json: &serde_json::Value, field_names: Vec<&str>) {
         //println!("[DEBUG] passed to print_formatted(): {}\n{:#?}", json, field_names);
         let mut field_vals_vec: std::vec::Vec<std::collections::HashMap<String,String>> = vec![];
         let mut field_lens: std::collections::HashMap<String,usize> = HashMap::new();

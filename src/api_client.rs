@@ -9,6 +9,7 @@ static SAUCE_API_URL: &'static str = "https://saucelabs.com/rest/v1/";
 static API_STATUS_PATH: &'static str = "info/status";
 static GET_JOBS_PATH: &'static str = "/jobs";
 static GET_JOB_PATH: &'static str = "/jobs";
+static UPLOADS_PATH: &'static str = "/storage";
 
 /**
  * returns the "healthcheck" api status from Saucelabs API
@@ -18,6 +19,23 @@ pub fn get_api_status() -> serde_json::Value {
     let resp = reqwest::blocking::get(&format!("{}{}", &SAUCE_API_URL, &API_STATUS_PATH)).unwrap();
     //println!("API response: \n{:?}", resp.status());
 
+    let body = resp.text().unwrap();
+    let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
+
+    json
+}
+
+//apiURL UPLOADS_PATH/username
+pub fn get_uploads() -> serde_json::Value {
+
+    let sauce_username = env::var("SAUCE_USERNAME").unwrap();
+    let sauce_access_key = env::var("SAUCE_ACCESS_KEY").unwrap();
+
+    let client = reqwest::blocking::Client::new();
+    let resp = client
+        .get(&format!("{}{}/{}", &SAUCE_API_URL, &UPLOADS_PATH, &sauce_username))
+        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .send().unwrap();
     let body = resp.text().unwrap();
     let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
 
