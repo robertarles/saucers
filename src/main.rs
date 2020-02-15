@@ -3,8 +3,6 @@ use std::collections::HashMap;
 
 extern crate clap;
 use clap::{Arg, App, SubCommand};
-// use reqwest::Client;
-// use futures::executor::block_on;
 
 fn main() {
 
@@ -36,6 +34,21 @@ fn main() {
         )
         .subcommand(SubCommand::with_name("uploads")
             .about("Get a list of files that have been uploaded to sauce storage.")
+            .arg(Arg::with_name("formatted")
+                .short("o")
+                .takes_value(true)
+                .required(false)
+                .help("Request output in columnar format, requires field names to include in table (e.g. \"id,status,passed\")")
+            )
+        )
+        .subcommand(SubCommand::with_name("upload")
+            .about("Upload a file to your accounts sauce storage.")
+            .arg(Arg::with_name("filename")
+                .short("f")
+                .takes_value(true)
+                .required(true)
+                .help("Filename, with path, to upload to sauce storage.")
+            )
             .arg(Arg::with_name("formatted")
                 .short("o")
                 .takes_value(true)
@@ -117,8 +130,25 @@ fn main() {
             let job_args = matches.subcommand_matches("uploads").unwrap();
             call_get_uploads(job_args);
         },
+        Some("upload") => {
+            let job_args = matches.subcommand_matches("upload").unwrap();
+            call_post_upload(job_args);
+        },
         None => println!("No subcommand was used.\nUse --help for subcommand help."),
         _ => println!("Subcommand not implemented!\nUse --help for subcommand help."),
+    }
+
+    fn call_post_upload(job_args: &clap::ArgMatches){
+        let filename = job_args.value_of("filename").unwrap();
+        let json_response = api_client::post_upload(filename);
+        if job_args.is_present("formatted") {
+            let format_fields_string = job_args.value_of("formatted").unwrap();
+            let format_fields_string_cleaned = format_fields_string.replace(" ","");
+            let format_fields = format_fields_string_cleaned.split(",").collect();
+            print_formatted(&json_response, format_fields);
+        } else {
+            println!("{}", json_response);
+        }
     }
 
     fn call_get_api_status(job_args: &clap::ArgMatches){
