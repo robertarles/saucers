@@ -7,8 +7,11 @@ use clap::{Arg, App, SubCommand};
 fn main() {
 
     // handle the CLI args
-    let matches = App::new("args")
+    let matches = App::new("saucers")
+        .version("0.9")
+        .about("\nSaucelabs api util.\nIMPORTANT: This program expects you to have already set your saucelabs credentials in the environment variables SAUCE_USERNAME and SAUCE_ACCESS_KEY (e.g in your .bashrc or .zshrc, or Windows system properties)")
         .subcommand(SubCommand::with_name("apistatus")
+            .version(".1")
             .about("Get the current saucelabs API status.")
             .arg(Arg::with_name("formatted")
                 .short("o")
