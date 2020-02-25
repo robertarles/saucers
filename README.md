@@ -4,9 +4,13 @@ A command line utility to interface with the saucelabs API.
 
 ## Help
 
+`saucers --help`
+
 ```text
-saucers --help
-args
+saucers 0.9
+Saucelabs api util.
+IMPORTANT: This program expects you to have already set your saucelabs credentials in the environment variables
+SAUCE_USERNAME and SAUCE_ACCESS_KEY (e.g in your .bashrc or .zshrc, or Windows system properties)
 
 USAGE:
     saucers [SUBCOMMAND]
