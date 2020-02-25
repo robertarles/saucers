@@ -28,11 +28,35 @@ pub fn get_api_status() -> serde_json::Value {
     json
 }
 
+/**
+ * Load the saucelabs credentials from environment variables
+ */
+fn load_sauce_credentials() -> (String,String) {
+
+    let sauce_username: String;
+    match env::var("SAUCE_USERNAME") {
+        Ok(v) => sauce_username = (*v).to_string(),
+        Err(e) => {
+            println!("Error reading SAUCE_USERNAME: {}", e);
+            std::process::exit(1);
+        }
+    }
+
+    let sauce_access_key:  String;
+    match env::var("SAUCE_ACCESS_KEY") {
+        Ok(v) => sauce_access_key = (*v).to_string(),
+        Err(e) => {
+            println!("Error reading SAUCE_ACCESS_KEY: {}", e);
+            std::process::exit(1);
+        }
+    }
+
+    (sauce_username, sauce_access_key)
+}
+
 pub fn post_upload(filename: &str) -> serde_json::Value {
-    // request.Header.Add("Content-Type", "application/octet-stream")  
-    // apiURL + "/storage/" + username + "/" + uploadFilename + "?overwrite=true"
-    let sauce_username = env::var("SAUCE_USERNAME").unwrap();
-    let sauce_access_key = env::var("SAUCE_ACCESS_KEY").unwrap();
+
+    let (sauce_username, sauce_access_key) = load_sauce_credentials();
 
     let path = Path::new(&filename);
     // let file_path = path.parent().unwrap();
@@ -56,8 +80,7 @@ pub fn post_upload(filename: &str) -> serde_json::Value {
 //apiURL UPLOADS_PATH/username
 pub fn get_uploads() -> serde_json::Value {
 
-    let sauce_username = env::var("SAUCE_USERNAME").unwrap();
-    let sauce_access_key = env::var("SAUCE_ACCESS_KEY").unwrap();
+    let (sauce_username, sauce_access_key) = load_sauce_credentials();
 
     let client = reqwest::blocking::Client::new();
     let resp = client
@@ -74,9 +97,8 @@ pub fn get_uploads() -> serde_json::Value {
  * return a list of jobs
  */
 pub fn get_jobs(max: &str) -> serde_json::Value {
-    
-    let sauce_username = env::var("SAUCE_USERNAME").unwrap();
-    let sauce_access_key = env::var("SAUCE_ACCESS_KEY").unwrap();
+
+    let (sauce_username, sauce_access_key) = load_sauce_credentials();
     
     let jobs_params = format!("?limit={}&full=true", max);
     let client = reqwest::blocking::Client::new();
@@ -94,9 +116,8 @@ pub fn get_jobs(max: &str) -> serde_json::Value {
  * get a specific jobs details
  */
 pub fn get_job(job_id: &str) -> serde_json::Value {
-    
-    let sauce_username = env::var("SAUCE_USERNAME").unwrap();
-    let sauce_access_key = env::var("SAUCE_ACCESS_KEY").unwrap();
+
+    let (sauce_username, sauce_access_key) = load_sauce_credentials();
     
     let client = reqwest::blocking::Client::new();
     let resp = client
@@ -117,8 +138,7 @@ pub fn get_job(job_id: &str) -> serde_json::Value {
  */
 pub fn get_job_asset_file(job_id: &str, asset_filename: &str) -> String {
     
-    let sauce_username = env::var("SAUCE_USERNAME").unwrap();
-    let sauce_access_key = env::var("SAUCE_ACCESS_KEY").unwrap();
+    let (sauce_username, sauce_access_key) = load_sauce_credentials();
     
     let client = reqwest::blocking::Client::new();
     let resp = client
@@ -135,9 +155,7 @@ pub fn get_job_asset_file(job_id: &str, asset_filename: &str) -> String {
  */
 pub fn get_job_asset_list(job_id: &str) -> serde_json::Value{
     
-    // apiURL+"/"+username+"/jobs/"+jobID+"/assets
-    let sauce_username = env::var("SAUCE_USERNAME").unwrap();
-    let sauce_access_key = env::var("SAUCE_ACCESS_KEY").unwrap();
+    let (sauce_username, sauce_access_key) = load_sauce_credentials();
     
     let client = reqwest::blocking::Client::new();
     let resp = client
