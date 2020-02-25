@@ -31,7 +31,7 @@ Written in Rust. #rustlang
 
 ## Usage Examples
 
-list (at max) the last five jobs started on Saucelabs. The output is raw JSON, so is not pretty, but useful to pipe to another command, or store for another app to use.
+List (at max) the last five jobs started on Saucelabs. The output is raw JSON, so is not pretty, but useful to pipe to another command, or store for another app to use.
 
 `saucers jobs -m 5`
 
@@ -39,16 +39,26 @@ list (at max) the last five jobs started on Saucelabs. The output is raw JSON, s
 [{"assigned_tunnel_id":"09fxxxe33bf843axxx63e57d244ff03d","automation_backend":"appium","breakpointed":null,"browser":"iphone","browser_short_version":"12.2","browser_version":"12.2.","build":"ExampleJobName","command_counts":null,"commands_not_successful":0,"consolidated_status":"in progress","container":false,"creation_time":1582650601,"custom-data":null,"deletion_time":null,"end_time":null,"error":null,"id":"0f511bd9e69e41e297eba599d29cxxxx","log_url":"https://assets.saucelabs.com/jobs/0f511bd9e69e41e297eba599d29cxxxx/selenium-server.log","modification_time":1582650602,"name":null,"os":"Mac 10.14","owner":"exampleOwner","passed":null,"performance_enabled":null,"proxied":true,"proxy_host":"10.119.25.77","public":"team","record_screenshots":true,"record_video":true,"start_time":1582650602,"status":"in progress","tags":["stage","ios","20200214.7","02/25/2020 04:58:09 pm"],"video_url":"https://assets.saucelabs.com/jobs/0f511bd9e69e41e297eba599d29cxxxx/video.flv"},{"assigned_tunnel_id":"ba56584d6b334e118100746eb0e477db","automation_backend":"appium","breakpointed":null,"browser":"iphone","browser_short_version":"12.2","browser_version":"12.2.","build":"ExampleJobName","command_counts":null,"commands_not_successful":0,"consolidated_status":"in progress","container":false,"creation_time":1582650587,"custom-data":null,"deletion_time":null,"end_time":null,"error":null,"id":"0f511bd9e69e41e297eba599d29cxxxx","log_url":"https://assets.saucelabs.com/jobs/0f511bd9e69e41e297eba599d29cxxxx/selenium-server.log","modification_time":1582650588,"name":null,"os":"Mac 10.14","owner":"exampleOwner","passed":null,"performance_enabled":null,"proxied":true,"proxy_host":"10.119.49.230","public":"team","record_screenshots":true,"record_video":true,"start_time":1582650587,"status":"in progress","tags":["stage","ios","20200214.7","02/25/2020 04:58:09 pm"],"video_url":"https://assets.saucelabs.com/jobs/0f511bd9e69e41e297eba599d29cxxxx/video.flv"},{"assigned_tunnel_id":"d42054b285d54d528ca42546191b02a7","automation_backend":"appium","breakpointed":null,"browser":"android","browser_short_version":"8.0","browser_version":"8.0.","build":"ExampleJobName","command_counts":null,"commands_not_successful":0,"consolidated_status":"in progress","container":false,"creation_time":1582650579,"custom-data":null,"deletion_time":null,"end_time":null,"error":null,"id":"0f511bd9e69e41e297eba599d29cxxxx","log_url":"https://assets.saucelabs.com/jobs/0f511bd9e69e41e297eba599d29cxxxx/selenium-server.log","modification_time":1582650602,"name":null,"os":"Linux","owner":"exampleOwner","passed":null,"performance_enabled":null,"proxied":true,"proxy_host":"10.119.41.101","public":"team","record_screenshots":true,"record_video":true,"start_time":1582650582,"status":"in progress","tags":["stage","android","20200214.1","02/25/2020 04:51:17 pm"],"video_url":"https://assets.saucelabs.com/jobs/0f511bd9e69e41e297eba599d29cxxxx/video.flv"},{"assigned_tunnel_id":"09fxxxe33bf843axxx63e57d244ff03d","automation_backend":"appium","breakpointed":null,"browser":"iphone","browser_short_version":"12.2","browser_version":"12.2.","build":"ExampleJobName","command_counts":null,"commands_not_successful":0,"consolidated_status":"in progress","container":false,"creation_time":1582650572,"custom-data":null,"deletion_time":null,"end_time":null,"error":null,"id":"0f511bd9e69e41e297eba599d29cxxxx","log_url":"https://assets.saucelabs.com/jobs/0f511bd9e69e41e297eba599d29cxxxx/selenium-server.log","modification_time":1582650597,"name":null,"os":"Mac 10.14","owner":"exampleOwner","passed":null,"performance_enabled":null,"proxied":true,"proxy_host":"10.119.25.77","public":"team","record_screenshots":true,"record_video":true,"start_time":1582650572,"status":"in progress","tags":["stage","ios","20200214.7","02/25/2020 04:58:09 pm"],"video_url":"https://assets.saucelabs.com/jobs/0f511bd9e69e41e297eba599d29cxxxx/video.flv"},{"assigned_tunnel_id":"09fxxxe33bf843axxx63e57d244ff03d","automation_backend":"appium","breakpointed":null,"browser":"iphone","browser_short_version":"12.2","browser_version":"12.2.","build":"ExampleJobName","command_counts":null,"commands_not_successful":0,"consolidated_status":"in progress","container":false,"creation_time":1582650568,"custom-data":null,"deletion_time":null,"end_time":null,"error":null,"id":"0f511bd9e69e41e297eba599d29cxxxx","log_url":"https://assets.saucelabs.com/jobs/0f511bd9e69e41e297eba599d29cxxxx/selenium-server.log","modification_time":1582650590,"name":null,"os":"Mac 10.14","owner":"exampleOwner","passed":null,"performance_enabled":null,"proxied":true,"proxy_host":"10.119.25.77","public":"team","record_screenshots":true,"record_video":true,"start_time":1582650569,"status":"in progress","tags":["stage","ios","20200214.7","02/25/2020 04:58:09 pm"],"video_url":"https://assets.saucelabs.com/jobs/0f511bd9e69e41e297eba599d29cxxxx/video.flv"}]
 ```
 
-Same command, piped through `jq` to get pretty printing of the js. I _really_ like `jq` for command line formatting and manipulation of JSON.
+Same command, piped through `jq` to get pretty printing of the js. I _really_ like [jq](https://stedolan.github.io/jq/) for command line formatting and manipulation of JSON.
 
 `saucers jobs -m 5 | jq .`
-TODO: add the output and a link to the jq site
+
+![Example of output piped into "jq"](docs/images/saucers-jq-example-output.png)
 
 Example use of the `-o` formatting of output. You can omit the parentheses around the final params below IF there are no spaces in the params.
 
 `saucers uploads -o "name,size"`
 
-TODO: add the output of the formatted uploads output
+```
+name                     size
+-----------------------------------
+Android_20200214.1.apk   108550234
+Android_20200219.1.apk   108227531
+Android_20200219.3.apk   108227749
+Android_20200220.2.apk   134294213
+Android_20200214.1.apk   131756509
+```
+
 
 ## Downloads
 
