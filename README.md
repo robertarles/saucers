@@ -2,6 +2,14 @@
 
 A command line utility to interface with the saucelabs API.
 
+It is expected that you already have the environment variables SAUCE_USERNAME and SAUCE_ACCESS_KEY set in your command line environment. 
+
+For Mac and Linux, you probably want to set these variables in your .bashrc or .zshrc.
+
+For Windows, this can be set in Start | System Information | System Properties | Advanced System Settings | Advanced (tab) and click the "Environment Variables..." button.
+
+Your 'username' and 'access_key' can be found here [https://app.saucelabs.com/user-settings](https://app.saucelabs.com/user-settings)
+
 ## Help
 
 `saucers --help`
