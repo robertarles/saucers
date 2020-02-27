@@ -75,3 +75,7 @@ Android_20200214.1.apk   131756509
 ## Downloads
 
 See the bin/{OS_Name} directories of this git repo. On github, go to bin/{osname} and click on the binary, then click the download button.
+
+[MacOS](bin/macos/saucers)
+[linux](bin/linux/saucers)
+[windows](bin/windows/saucers.exe)
