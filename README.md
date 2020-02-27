@@ -74,7 +74,7 @@ Android_20200214.1.apk   131756509
 
 ## Downloads
 
-[MacOS](raw/master/bin/macos/saucers)
+[MacOS](https://github.com/robertarles/saucers/raw/master/bin/macos/saucers)
 
 [linux](raw/master/bin/linux/saucers)
 
