@@ -19,9 +19,13 @@ static UPLOADS_PATH: &'static str = "storage";
  */
 pub fn get_api_status() -> serde_json::Value {
 
-    let resp = reqwest::blocking::get(&format!("{}{}", &SAUCE_API_URL, &API_STATUS_PATH)).unwrap();
-    //println!("API response: \n{:?}", resp.status());
-
+    //let resp = reqwest::blocking::get(&format!("{}{}", &SAUCE_API_URL, &API_STATUS_PATH)).unwrap();    
+    let client = reqwest::blocking::Client::new();
+    let resp = client
+        .get(&format!("{}{}", &SAUCE_API_URL, &API_STATUS_PATH))
+        .timeout(Duration::from_secs(120))
+        .send().unwrap();
+    
     let body = resp.text().unwrap();
     let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
 
@@ -86,6 +90,7 @@ pub fn get_uploads() -> serde_json::Value {
     let resp = client
         .get(&format!("{}{}/{}", &SAUCE_API_URL, &UPLOADS_PATH, &sauce_username))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .timeout(Duration::from_secs(120))
         .send().unwrap();
     let body = resp.text().unwrap();
     let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
@@ -105,6 +110,7 @@ pub fn get_jobs(max: &str) -> serde_json::Value {
     let resp = client
         .get(&format!("{}{}{}", &SAUCE_API_URL, &GET_JOBS_PATH, &jobs_params))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .timeout(Duration::from_secs(120))
         .send().unwrap();
     let body = resp.text().unwrap();
     let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
@@ -123,6 +129,7 @@ pub fn get_job(job_id: &str) -> serde_json::Value {
     let resp = client
         .get(&format!("{}{}/{}", &SAUCE_API_URL, &GET_JOB_PATH, &job_id))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .timeout(Duration::from_secs(120))
         .send().unwrap();
     let body = resp.text().unwrap();
     let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
@@ -144,6 +151,7 @@ pub fn get_job_asset_file(job_id: &str, asset_filename: &str) -> String {
     let resp = client
         .get(&format!("{}{}/jobs/{}/assets/{}", &SAUCE_API_URL, &sauce_username, &job_id, &asset_filename))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .timeout(Duration::from_secs(120))
         .send().unwrap();
     let body = resp.text().unwrap();
     
@@ -161,6 +169,7 @@ pub fn get_job_asset_list(job_id: &str) -> serde_json::Value{
     let resp = client
         .get(&format!("{}{}/jobs/{}/assets", &SAUCE_API_URL, &sauce_username, &job_id))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .timeout(Duration::from_secs(120))
         .send().unwrap();
     let body = resp.text().unwrap();
     let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
