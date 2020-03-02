@@ -61,7 +61,7 @@ Same command, piped through `jq` to get pretty printing of the js. I _really_ li
 
 ![Example of output piped into "jq"](docs/images/saucers-jq-example-output.png)
 
-Example use of the `-o` formatting of output. You can omit the parentheses around the final params below IF there are no spaces in the params.
+Example use of the `-o` formatting of output. You can omit the quotes around the final params below IF there are no spaces in the params.
 
 `saucers uploads -o "name,size"`
 
