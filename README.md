@@ -2,6 +2,14 @@
 
 A command line utility to interface with the saucelabs API.
 
+It is expected that you already have the environment variables SAUCE_USERNAME and SAUCE_ACCESS_KEY set in your command line environment. 
+
+For Mac and Linux, you probably want to set these variables in your .bashrc or .zshrc.
+
+For Windows, this can be set in Start | System Information | System Properties | Advanced System Settings | Advanced (tab) and click the "Environment Variables..." button.
+
+Your 'username' and 'access_key' can be found here [https://app.saucelabs.com/user-settings](https://app.saucelabs.com/user-settings)
+
 ## Help
 
 `saucers --help`
@@ -66,4 +74,10 @@ Android_20200214.1.apk   131756509
 
 ## Downloads
 
-See the bin/{OS_Name} directories. Click on the binary, then click the download button.
+Mac and Linux downloads, don't forget you have to do a `chmod +x {path}/{to}/saucers` to make it executable
+
+[MacOS](https://github.com/robertarles/saucers/raw/master/bin/macos/saucers)
+
+[linux](https://github.com/robertarles/saucers/raw/master/bin/linux/saucers)
+
+[windows](https://github.com/robertarles/saucers/raw/master/bin/windows/saucers.exe)
