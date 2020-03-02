@@ -114,8 +114,23 @@ fn main() {
                 .help("Request output in columnar format, requires field names to include in table (e.g. \"id,status,passed\")")
             )
         )
+        .subcommand(SubCommand::with_name("tunnel")
+            .about("Get information for a tunnel given its ID")
+            .arg(Arg::with_name("tunnel_id")
+                .short("i")
+                .takes_value(true)
+                .required(true)
+                .help("ID of the tunnel")
+            )
+            .arg(Arg::with_name("formatted")
+                .short("o")
+                .takes_value(true)
+                .required(false)
+                .help("Request output in columnar format, requires field names to include in table (e.g. \"id,status,passed\")")
+            )
+        )
         .subcommand(SubCommand::with_name("tunneljobs")
-            .about("Get a list of jobs using a tunnel")
+            .about("Get the number of jobs that are running through the tunnel over the past 60 seconds")
             .arg(Arg::with_name("tunnel_id")
                 .short("i")
                 .takes_value(true)
@@ -165,6 +180,10 @@ fn main() {
             let job_args = matches.subcommand_matches("tunnels").unwrap();
             call_get_tunnels(job_args);
         },
+        Some("tunnel") => {
+            let job_args = matches.subcommand_matches("tunnel").unwrap();
+            call_get_tunnel(job_args);
+        },
         Some("tunneljobs") => {
             let job_args = matches.subcommand_matches("tunneljobs").unwrap();
             call_get_tunnel_jobs(job_args);
@@ -200,6 +219,19 @@ fn main() {
 
     fn call_get_tunnels(job_args: &clap::ArgMatches){
         let json_response = api_client::get_tunnels();
+        if job_args.is_present("formatted") {
+            let format_fields_string = job_args.value_of("formatted").unwrap();
+            let format_fields_string_cleaned = format_fields_string.replace(" ","");
+            let format_fields = format_fields_string_cleaned.split(",").collect();
+            print_formatted(&json_response, format_fields);
+        } else {
+            println!("{}", json_response);
+        }
+    }
+
+    fn call_get_tunnel(job_args: &clap::ArgMatches){
+        let tunnel_id = job_args.value_of("tunnel_id").unwrap();
+        let json_response = api_client::get_tunnel(tunnel_id);
         if job_args.is_present("formatted") {
             let format_fields_string = job_args.value_of("formatted").unwrap();
             let format_fields_string_cleaned = format_fields_string.replace(" ","");
