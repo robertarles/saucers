@@ -13,6 +13,8 @@ static API_STATUS_PATH: &'static str = "info/status";
 static GET_JOBS_PATH: &'static str = "jobs";
 static GET_JOB_PATH: &'static str = "jobs";
 static UPLOADS_PATH: &'static str = "storage";
+static TUNNELS_PATH: &'static str = "{{USERNAME}}/tunnels";
+static TUNNEL_JOBS_PATH: &'static str = "{{USERNAME}}/tunnels/{{TUNNEL_ID}}/num_jobs";
 
 /**
  * returns the "healthcheck" api status from Saucelabs API
@@ -57,6 +59,42 @@ fn load_sauce_credentials() -> (String,String) {
 
     (sauce_username, sauce_access_key)
 }
+
+pub fn get_tunnels() -> serde_json::Value {
+
+    let (sauce_username, sauce_access_key) = load_sauce_credentials();
+
+    //curl -u USERNAME:ACCESS_KEY https://saucelabs.com/rest/v1/USERNAME/tunnels
+    let client = reqwest::blocking::Client::new();
+    let resp = client
+        .get(&format!("{}{}", &SAUCE_API_URL, &TUNNELS_PATH.replace("{{USERNAME}}", &sauce_username)))
+        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .timeout(Duration::from_secs(120))
+        .send().unwrap();
+    let body = resp.text().unwrap();
+    let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
+
+    json
+
+}
+pub fn get_tunnel_jobs(tunnel_id: &str) -> serde_json::Value {
+
+    let (sauce_username, sauce_access_key) = load_sauce_credentials();
+
+    let client = reqwest::blocking::Client::new();
+    let resp = client
+        .get(&format!("{}{}", &SAUCE_API_URL, &TUNNEL_JOBS_PATH.replace("{{USERNAME}}", &sauce_username).replace("{{TUNNEL_ID}}", tunnel_id)))
+        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .timeout(Duration::from_secs(120))
+        .send().unwrap();
+    let body = resp.text().unwrap();
+    let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
+
+    json
+
+}
+
+//curl -u USERNAME:ACCESS_KEY https://saucelabs.com/rest/v1/USERNAME/tunnels/TUNNEL_ID/num_jobs
 
 pub fn post_upload(filename: &str) -> serde_json::Value {
 
