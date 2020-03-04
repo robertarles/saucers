@@ -136,7 +136,6 @@ pub fn post_upload(filename: &str) -> serde_json::Value {
     json
 }
 
-//apiURL UPLOADS_PATH/username
 pub fn get_uploads() -> serde_json::Value {
 
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
@@ -209,7 +208,6 @@ pub fn stop_job(job_id: &str) -> serde_json::Value {
     
     json
 }
-
 
 /**
  * get a particular job asset file, valid file names:
