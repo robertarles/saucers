@@ -36,6 +36,7 @@ SUBCOMMANDS:
     help          Prints this message or the help of the given subcommand(s)
     job           Get data about a particular job ID.
     jobs          Get a list of jobs data.
+    stopjob       Terminates a running job
     tunnel        Get information for a tunnel given its ID
     tunneljobs    Get the number of jobs that are running through the tunnel over the past 60 seconds
     tunnels       Get a list of tunnels available to the user account
