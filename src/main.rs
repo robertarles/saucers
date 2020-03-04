@@ -20,21 +20,6 @@ fn main() {
                 .help("Request output in columnar format, requires field names to include in table (e.g. \"id,status,passed\")")
             )
         )
-        .subcommand(SubCommand::with_name("job")
-            .about("Get data about a particular job ID.")
-            .arg(Arg::with_name("id")
-                .short("i")
-                .takes_value(true)
-                .required(true)
-                .help("job ID")
-            )
-            .arg(Arg::with_name("formatted")
-                .short("o")
-                .takes_value(true)
-                .required(false)
-                .help("Request output in columnar format, requires field names to include in table (e.g. \"id,status,passed\")")
-            )
-        )
         .subcommand(SubCommand::with_name("uploads")
             .about("Get a list of files that have been uploaded to sauce storage.")
             .arg(Arg::with_name("formatted")
@@ -72,6 +57,30 @@ fn main() {
                 .takes_value(true)
                 .required(false)
                 .help("Request output in columnar format, requires field names to include in table (e.g. \"id,status,passed\")")
+            )
+        )
+        .subcommand(SubCommand::with_name("job")
+            .about("Get data about a particular job ID.")
+            .arg(Arg::with_name("id")
+                .short("i")
+                .takes_value(true)
+                .required(true)
+                .help("job ID")
+            )
+            .arg(Arg::with_name("formatted")
+                .short("o")
+                .takes_value(true)
+                .required(false)
+                .help("Request output in columnar format, requires field names to include in table (e.g. \"id,status,passed\")")
+            )
+        )
+        .subcommand(SubCommand::with_name("stopjob")
+            .about("Terminates a running job")
+            .arg(Arg::with_name("id")
+                .short("i")
+                .takes_value(true)
+                .required(true)
+                .help("job ID")
             )
         )
         .subcommand(SubCommand::with_name("assetfile")
@@ -152,10 +161,6 @@ fn main() {
             let job_args = matches.subcommand_matches("apistatus").unwrap();
             call_get_api_status(job_args);
         },
-        Some("job") => {
-            let job_args = matches.subcommand_matches("job").unwrap();
-            call_get_job(job_args);
-        },
         Some("assetfile") => {
             let job_args = matches.subcommand_matches("assetfile").unwrap();
             call_get_job_asset_file(job_args);
@@ -167,6 +172,14 @@ fn main() {
         Some("jobs") => {
             let job_args = matches.subcommand_matches("jobs").unwrap();
             call_get_jobs(job_args);
+        },
+        Some("job") => {
+            let job_args = matches.subcommand_matches("job").unwrap();
+            call_get_job(job_args);
+        },
+        Some("stopjob") => {
+            let job_args = matches.subcommand_matches("stopjob").unwrap();
+            call_stop_job(job_args);
         },
         Some("uploads") => {
             let job_args = matches.subcommand_matches("uploads").unwrap();
@@ -288,6 +301,19 @@ fn main() {
     fn call_get_job(job_args: &clap::ArgMatches){
         let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
         let json_response = api_client::get_job(&job_id[..]);
+        if job_args.is_present("formatted") {
+            let format_fields_string = job_args.value_of("formatted").unwrap();
+            let format_fields_string_cleaned = format_fields_string.replace(" ","");
+            let format_fields = format_fields_string_cleaned.split(",").collect();
+            print_formatted(&json_response, format_fields);
+        } else {
+            println!("{}", json_response);
+        }
+    }
+
+    fn call_stop_job(job_args: &clap::ArgMatches){
+        let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
+        let json_response = api_client::stop_job(&job_id[..]);
         if job_args.is_present("formatted") {
             let format_fields_string = job_args.value_of("formatted").unwrap();
             let format_fields_string_cleaned = format_fields_string.replace(" ","");

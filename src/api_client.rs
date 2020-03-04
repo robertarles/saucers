@@ -12,6 +12,7 @@ static SAUCE_API_URL: &'static str = "https://saucelabs.com/rest/v1/";
 static API_STATUS_PATH: &'static str = "info/status";
 static GET_JOBS_PATH: &'static str = "jobs";
 static GET_JOB_PATH: &'static str = "jobs";
+static STOP_JOB_PATH: &'static str = "{{USERNAME}}/jobs/{{JOB_ID}}/stop";
 static UPLOADS_PATH: &'static str = "storage";
 static TUNNELS_PATH: &'static str = "{{USERNAME}}/tunnels";
 static TUNNEL_JOB_PATH: &'static str = "{{USERNAME}}/tunnels/{{TUNNEL_ID}}/";
@@ -182,6 +183,24 @@ pub fn get_job(job_id: &str) -> serde_json::Value {
     let client = reqwest::blocking::Client::new();
     let resp = client
         .get(&format!("{}{}/{}", &SAUCE_API_URL, &GET_JOB_PATH, &job_id))
+        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .timeout(Duration::from_secs(120))
+        .send().unwrap();
+    let body = resp.text().unwrap();
+    let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
+    
+    json
+}
+
+/**
+ * stop a specific job
+ */
+pub fn stop_job(job_id: &str) -> serde_json::Value {
+
+    let (sauce_username, sauce_access_key) = load_sauce_credentials();
+    let client = reqwest::blocking::Client::new();
+    let resp = client
+        .put(&format!( "{}{}", &SAUCE_API_URL, &STOP_JOB_PATH.replace("{{USERNAME}}", &sauce_username).replace("{{JOB_ID}}", &job_id) ))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
         .send().unwrap();
