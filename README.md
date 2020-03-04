@@ -16,6 +16,7 @@ Your 'username' and 'access_key' can be found here [https://app.saucelabs.com/us
 
 ```text
 saucers 0.9
+
 Saucelabs api util.
 IMPORTANT: This program expects you to have already set your saucelabs credentials in the environment variables
 SAUCE_USERNAME and SAUCE_ACCESS_KEY (e.g in your .bashrc or .zshrc, or Windows system properties)
@@ -28,15 +29,18 @@ FLAGS:
     -V, --version    Prints version information
 
 SUBCOMMANDS:
-    apistatus    Get the current saucelabs API status.
-    assetfile    Get a file asset associated with a particular job ID. (logs, screenshots, etc.) See the 'assetlist'
-                 subcommand.
-    assetlist    Get the asset list associated with a particular job ID
-    help         Prints this message or the help of the given subcommand(s)
-    job          Get data about a particular job ID.
-    jobs         Get a list of jobs data.
-    upload       Upload a file to your accounts sauce storage.
-    uploads      Get a list of files that have been uploaded to sauce storage.
+    apistatus     Get the current saucelabs API status.
+    assetfile     Get a file asset associated with a particular job ID. (logs, screenshots, etc.) See the
+                  'assetlist' subcommand.
+    assetlist     Get the asset list associated with a particular job ID
+    help          Prints this message or the help of the given subcommand(s)
+    job           Get data about a particular job ID.
+    jobs          Get a list of jobs data.
+    tunnel        Get information for a tunnel given its ID
+    tunneljobs    Get the number of jobs that are running through the tunnel over the past 60 seconds
+    tunnels       Get a list of tunnels available to the user account
+    upload        Upload a file to your accounts sauce storage.
+    uploads       Get a list of files that have been uploaded to sauce storage.
 ```
 
 Written in Rust. #rustlang
@@ -57,7 +61,7 @@ Same command, piped through `jq` to get pretty printing of the js. I _really_ li
 
 ![Example of output piped into "jq"](docs/images/saucers-jq-example-output.png)
 
-Example use of the `-o` formatting of output. You can omit the parentheses around the final params below IF there are no spaces in the params.
+Example use of the `-o` formatting of output. You can omit the quotes around the final params below IF there are no spaces in the params.
 
 `saucers uploads -o "name,size"`
 
