@@ -29,19 +29,21 @@ FLAGS:
     -V, --version    Prints version information
 
 SUBCOMMANDS:
-    apistatus     Get the current saucelabs API status.
-    assetfile     Get a file asset associated with a particular job ID. (logs, screenshots, etc.) See the
-                  'assetlist' subcommand.
-    assetlist     Get the asset list associated with a particular job ID
-    help          Prints this message or the help of the given subcommand(s)
-    job           Get data about a particular job ID.
-    jobs          Get a list of jobs data.
-    stopjob       Terminates a running job
-    tunnel        Get information for a tunnel given its ID
-    tunneljobs    Get the number of jobs that are running through the tunnel over the past 60 seconds
-    tunnels       Get a list of tunnels available to the user account
-    upload        Upload a file to your accounts sauce storage.
-    uploads       Get a list of files that have been uploaded to sauce storage.
+    apistatus             Get the current saucelabs API status.
+    assetfile             Get a file asset associated with a particular job ID. (logs, screenshots, etc.) See the
+                          'assetlist' subcommand.
+    assetlist             Get the asset list associated with a particular job ID
+    help                  Prints this message or the help of the given subcommand(s)
+    job                   Get data about a particular job ID.
+    jobs                  Get a list of jobs data.
+    stopjob               Terminates a running job
+    supportedplatforms    Get a list of objects describing all the OS and browser platforms currently supported on a
+                          Sauce Labs API (e.g. appium or webdriver)
+    tunnel                Get information for a tunnel given its ID
+    tunneljobs            Get the number of jobs that are running through the tunnel over the past 60 seconds
+    tunnels               Get a list of tunnels available to the user account
+    upload                Upload a file to your accounts sauce storage.
+    uploads               Get a list of files that have been uploaded to sauce storage.
 ```
 
 Written in Rust. #rustlang
