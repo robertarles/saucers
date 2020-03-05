@@ -17,16 +17,33 @@ static UPLOADS_PATH: &'static str = "storage";
 static TUNNELS_PATH: &'static str = "{{USERNAME}}/tunnels";
 static TUNNEL_JOB_PATH: &'static str = "{{USERNAME}}/tunnels/{{TUNNEL_ID}}/";
 static TUNNEL_JOBS_PATH: &'static str = "{{USERNAME}}/tunnels/{{TUNNEL_ID}}/num_jobs";
+static SUPPORTED_PLATFORMS_PATH: &'static str = "info/platforms/{{AUTOMATION_API}}";
 
 /**
  * returns the "healthcheck" api status from Saucelabs API
  */
 pub fn get_api_status() -> serde_json::Value {
 
-    //let resp = reqwest::blocking::get(&format!("{}{}", &SAUCE_API_URL, &API_STATUS_PATH)).unwrap();    
     let client = reqwest::blocking::Client::new();
     let resp = client
         .get(&format!("{}{}", &SAUCE_API_URL, &API_STATUS_PATH))
+        .timeout(Duration::from_secs(120))
+        .send().unwrap();
+    
+    let body = resp.text().unwrap();
+    let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
+
+    json
+}
+
+/**
+ * returns platforms supported, by API (appium | webdriver)
+ */
+pub fn get_supported_platforms(automation_api: &str) -> serde_json::Value {
+
+    let client = reqwest::blocking::Client::new();
+    let resp = client
+        .get(&format!("{}{}", &SAUCE_API_URL, &SUPPORTED_PLATFORMS_PATH.replace("{{AUTOMATION_API}}", &automation_api)))
         .timeout(Duration::from_secs(120))
         .send().unwrap();
     

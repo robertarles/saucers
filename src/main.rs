@@ -11,13 +11,27 @@ fn main() {
         .version("0.9")
         .about("\nSaucelabs api util.\nIMPORTANT: This program expects you to have already set your saucelabs credentials in the environment variables SAUCE_USERNAME and SAUCE_ACCESS_KEY (e.g in your .bashrc or .zshrc, or Windows system properties)")
         .subcommand(SubCommand::with_name("apistatus")
-            .version(".1")
             .about("Get the current saucelabs API status.")
             .arg(Arg::with_name("formatted")
                 .short("o")
                 .takes_value(true)
                 .required(false)
                 .help("Request output in columnar format, requires field names to include in table (e.g. \"id,status,passed\")")
+            )
+        )
+        .subcommand(SubCommand::with_name("supportedplatforms")
+            .about("Get a list of objects describing all the OS and browser platforms currently supported on a Sauce Labs API (e.g. appium or webdriver)")
+            .arg(Arg::with_name("formatted")
+                .short("o")
+                .takes_value(true)
+                .required(false)
+                .help("Request output in columnar format, requires field names to include in table (e.g. \"id,status,passed\")")
+            )
+            .arg(Arg::with_name("api")
+                .short("a")
+                .takes_value(true)
+                .required(true)
+                .help("Specify the API to report on ( all | webdriver | appium )")
             )
         )
         .subcommand(SubCommand::with_name("uploads")
@@ -161,6 +175,10 @@ fn main() {
             let job_args = matches.subcommand_matches("apistatus").unwrap();
             call_get_api_status(job_args);
         },
+        Some("supportedplatforms") => {
+            let job_args = matches.subcommand_matches("supportedplatforms").unwrap();
+            call_get_supported_platforms(job_args);
+        },
         Some("assetfile") => {
             let job_args = matches.subcommand_matches("assetfile").unwrap();
             call_get_job_asset_file(job_args);
@@ -220,6 +238,19 @@ fn main() {
 
     fn call_get_api_status(job_args: &clap::ArgMatches){
         let json_response = api_client::get_api_status();
+        if job_args.is_present("formatted") {
+            let format_fields_string = job_args.value_of("formatted").unwrap();
+            let format_fields_string_cleaned = format_fields_string.replace(" ","");
+            let format_fields = format_fields_string_cleaned.split(",").collect();
+            print_formatted(&json_response, format_fields);
+        } else {
+            println!("{}", json_response);
+        }
+    }
+
+    fn call_get_supported_platforms(job_args: &clap::ArgMatches){
+        let api = job_args.value_of("api").unwrap();
+        let json_response = api_client::get_supported_platforms(api);
         if job_args.is_present("formatted") {
             let format_fields_string = job_args.value_of("formatted").unwrap();
             let format_fields_string_cleaned = format_fields_string.replace(" ","");
