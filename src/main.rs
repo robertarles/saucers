@@ -1,5 +1,6 @@
 mod api_client;
 use std::collections::HashMap;
+use serde_json::json;
 
 extern crate clap;
 use clap::{Arg, App, SubCommand};
@@ -222,192 +223,202 @@ fn main() {
         None => println!("No subcommand was used.\nUse --help for subcommand help."),
         _ => println!("Subcommand not implemented!\nUse --help for subcommand help."),
     }
+}
 
-    fn call_post_upload(job_args: &clap::ArgMatches){
-        let filename = job_args.value_of("filename").unwrap();
-        let json_response = api_client::post_upload(filename);
-        if job_args.is_present("formatted") {
-            let format_fields_string = job_args.value_of("formatted").unwrap();
-            let format_fields_string_cleaned = format_fields_string.replace(" ","");
-            let format_fields = format_fields_string_cleaned.split(",").collect();
-            print_formatted(&json_response, format_fields);
-        } else {
-            println!("{}", json_response);
-        }
+fn call_post_upload(job_args: &clap::ArgMatches){
+    let filename = job_args.value_of("filename").unwrap();
+    let json_response = api_client::post_upload(filename);
+    if job_args.is_present("formatted") {
+        let format_fields_string = job_args.value_of("formatted").unwrap();
+        let format_fields_string_cleaned = format_fields_string.replace(" ","");
+        let format_fields = format_fields_string_cleaned.split(",").collect();
+        print_formatted(&json_response, format_fields);
+    } else {
+        println!("{}", json_response);
     }
+}
 
-    fn call_get_api_status(job_args: &clap::ArgMatches){
-        let json_response = api_client::get_api_status();
-        if job_args.is_present("formatted") {
-            let format_fields_string = job_args.value_of("formatted").unwrap();
-            let format_fields_string_cleaned = format_fields_string.replace(" ","");
-            let format_fields = format_fields_string_cleaned.split(",").collect();
-            print_formatted(&json_response, format_fields);
-        } else {
-            println!("{}", json_response);
-        }
+fn call_get_api_status(job_args: &clap::ArgMatches){
+    let json_response = api_client::get_api_status();
+    let json_string = match json_response {
+        Ok(json_string) => json_string,
+        Err(e) => panic!(e)
+    };
+    if job_args.is_present("formatted") {
+        let format_fields_string = job_args.value_of("formatted").unwrap();
+        let format_fields_string_cleaned = format_fields_string.replace(" ","");
+        let format_fields = format_fields_string_cleaned.split(",").collect();
+        print_formatted_jsonstring(&json_string, format_fields);
+    } else {
+        println!("{}", json_string);
     }
+}
 
-    fn call_get_supported_platforms(job_args: &clap::ArgMatches){
-        let api = job_args.value_of("api").unwrap();
-        let json_response = api_client::get_supported_platforms(api);
-        if job_args.is_present("formatted") {
-            let format_fields_string = job_args.value_of("formatted").unwrap();
-            let format_fields_string_cleaned = format_fields_string.replace(" ","");
-            let format_fields = format_fields_string_cleaned.split(",").collect();
-            print_formatted(&json_response, format_fields);
-        } else {
-            println!("{}", json_response);
-        }
+fn call_get_supported_platforms(job_args: &clap::ArgMatches){
+    let api = job_args.value_of("api").unwrap();
+    let json_response = api_client::get_supported_platforms(api);
+    let json_string = match json_response {
+        Ok(json_string) => json_string,
+        Err(e) => panic!(e)
+    };
+    if job_args.is_present("formatted") {
+        let format_fields_string = job_args.value_of("formatted").unwrap();
+        let format_fields_string_cleaned = format_fields_string.replace(" ","");
+        let format_fields = format_fields_string_cleaned.split(",").collect();
+        print_formatted_jsonstring(&json_string, format_fields);
+    } else {
+        println!("{}", json_string);
     }
+}
 
-    fn call_get_tunnels(job_args: &clap::ArgMatches){
-        let json_response = api_client::get_tunnels();
-        if job_args.is_present("formatted") {
-            let format_fields_string = job_args.value_of("formatted").unwrap();
-            let format_fields_string_cleaned = format_fields_string.replace(" ","");
-            let format_fields = format_fields_string_cleaned.split(",").collect();
-            print_formatted(&json_response, format_fields);
-        } else {
-            println!("{}", json_response);
-        }
+fn call_get_tunnels(job_args: &clap::ArgMatches){
+    let json_response = api_client::get_tunnels();
+    let json_string = match json_response {
+        Ok(json_string) => json_string,
+        Err(e) => panic!(e)
+    };
+    if job_args.is_present("formatted") {
+        let format_fields_string = job_args.value_of("formatted").unwrap();
+        let format_fields_string_cleaned = format_fields_string.replace(" ","");
+        let format_fields = format_fields_string_cleaned.split(",").collect();
+        print_formatted_jsonstring(&json_string, format_fields);
+    } else {
+        println!("{}", json_string);
     }
+}
 
-    fn call_get_tunnel(job_args: &clap::ArgMatches){
-        let tunnel_id = job_args.value_of("tunnel_id").unwrap();
-        let json_response = api_client::get_tunnel(tunnel_id);
-        if job_args.is_present("formatted") {
-            let format_fields_string = job_args.value_of("formatted").unwrap();
-            let format_fields_string_cleaned = format_fields_string.replace(" ","");
-            let format_fields = format_fields_string_cleaned.split(",").collect();
-            print_formatted(&json_response, format_fields);
-        } else {
-            println!("{}", json_response);
-        }
+fn call_get_tunnel(job_args: &clap::ArgMatches){
+    let tunnel_id = job_args.value_of("tunnel_id").unwrap();
+    let json_response = api_client::get_tunnel(tunnel_id);
+    if job_args.is_present("formatted") {
+        let format_fields_string = job_args.value_of("formatted").unwrap();
+        let format_fields_string_cleaned = format_fields_string.replace(" ","");
+        let format_fields = format_fields_string_cleaned.split(",").collect();
+        print_formatted(&json_response, format_fields);
+    } else {
+        println!("{}", json_response);
     }
+}
 
-    fn call_get_tunnel_jobs(job_args: &clap::ArgMatches){
-        let tunnel_id = job_args.value_of("tunnel_id").unwrap();
-        let json_response = api_client::get_tunnel_jobs(tunnel_id);
-        if job_args.is_present("formatted") {
-            let format_fields_string = job_args.value_of("formatted").unwrap();
-            let format_fields_string_cleaned = format_fields_string.replace(" ","");
-            let format_fields = format_fields_string_cleaned.split(",").collect();
-            print_formatted(&json_response, format_fields);
-        } else {
-            println!("{}", json_response);
-        }
+fn call_get_tunnel_jobs(job_args: &clap::ArgMatches){
+    let tunnel_id = job_args.value_of("tunnel_id").unwrap();
+    let json_response = api_client::get_tunnel_jobs(tunnel_id);
+    if job_args.is_present("formatted") {
+        let format_fields_string = job_args.value_of("formatted").unwrap();
+        let format_fields_string_cleaned = format_fields_string.replace(" ","");
+        let format_fields = format_fields_string_cleaned.split(",").collect();
+        print_formatted(&json_response, format_fields);
+    } else {
+        println!("{}", json_response);
     }
+}
 
-    fn call_get_uploads(job_args: &clap::ArgMatches){
-        let json_response = api_client::get_uploads();
-        if job_args.is_present("formatted") {
-            let format_fields_string = job_args.value_of("formatted").unwrap();
-            let format_fields_string_cleaned = format_fields_string.replace(" ","");
-            let format_fields = format_fields_string_cleaned.split(",").collect();
-            let json_file_array = json_response.get("files").unwrap();
-            print_formatted(&json_file_array, format_fields);
-        } else {
-            println!("{}", json_response);
-        }
+fn call_get_uploads(job_args: &clap::ArgMatches){
+    let json_response = api_client::get_uploads();
+    if job_args.is_present("formatted") {
+        let format_fields_string = job_args.value_of("formatted").unwrap();
+        let format_fields_string_cleaned = format_fields_string.replace(" ","");
+        let format_fields = format_fields_string_cleaned.split(",").collect();
+        let json_file_array = json_response.get("files").unwrap();
+        print_formatted(&json_file_array, format_fields);
+    } else {
+        println!("{}", json_response);
     }
+}
 
-    fn call_get_jobs(job_args: &clap::ArgMatches){
-        // set a default 'max'
-        let mut max = String::from("10");
-        if job_args.is_present("max") {
-            max = job_args.value_of("max").unwrap().to_string();
-        };
-        let json_response = api_client::get_jobs(&max[..]);
-        if job_args.is_present("formatted") {
-            let format_fields_string = job_args.value_of("formatted").unwrap();
-            let format_fields_string_cleaned = format_fields_string.replace(" ","");
-            let format_fields = format_fields_string_cleaned.split(",").collect();
-            print_formatted(&json_response, format_fields);
-        } else {
-            println!("{}", json_response);
-        }
+fn call_get_jobs(job_args: &clap::ArgMatches){
+    // set a default 'max'
+    let mut max = String::from("10");
+    if job_args.is_present("max") {
+        max = job_args.value_of("max").unwrap().to_string();
+    };
+    let json_response = api_client::get_jobs(&max[..]);
+    if job_args.is_present("formatted") {
+        let format_fields_string = job_args.value_of("formatted").unwrap();
+        let format_fields_string_cleaned = format_fields_string.replace(" ","");
+        let format_fields = format_fields_string_cleaned.split(",").collect();
+        print_formatted(&json_response, format_fields);
+    } else {
+        println!("{}", json_response);
     }
+}
 
-    fn call_get_job(job_args: &clap::ArgMatches){
-        let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
-        let json_response = api_client::get_job(&job_id[..]);
-        if job_args.is_present("formatted") {
-            let format_fields_string = job_args.value_of("formatted").unwrap();
-            let format_fields_string_cleaned = format_fields_string.replace(" ","");
-            let format_fields = format_fields_string_cleaned.split(",").collect();
-            print_formatted(&json_response, format_fields);
-        } else {
-            println!("{}", json_response);
-        }
+fn call_get_job(job_args: &clap::ArgMatches){
+    let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
+    let json_response = api_client::get_job(&job_id[..]);
+    if job_args.is_present("formatted") {
+        let format_fields_string = job_args.value_of("formatted").unwrap();
+        let format_fields_string_cleaned = format_fields_string.replace(" ","");
+        let format_fields = format_fields_string_cleaned.split(",").collect();
+        print_formatted(&json_response, format_fields);
+    } else {
+        println!("{}", json_response);
     }
+}
 
-    fn call_stop_job(job_args: &clap::ArgMatches){
-        let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
-        let json_response = api_client::stop_job(&job_id[..]);
-        if job_args.is_present("formatted") {
-            let format_fields_string = job_args.value_of("formatted").unwrap();
-            let format_fields_string_cleaned = format_fields_string.replace(" ","");
-            let format_fields = format_fields_string_cleaned.split(",").collect();
-            print_formatted(&json_response, format_fields);
-        } else {
-            println!("{}", json_response);
-        }
+fn call_stop_job(job_args: &clap::ArgMatches){
+    let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
+    let json_response = api_client::stop_job(&job_id[..]);
+    if job_args.is_present("formatted") {
+        let format_fields_string = job_args.value_of("formatted").unwrap();
+        let format_fields_string_cleaned = format_fields_string.replace(" ","");
+        let format_fields = format_fields_string_cleaned.split(",").collect();
+        print_formatted(&json_response, format_fields);
+    } else {
+        println!("{}", json_response);
     }
+}
 
-    fn call_get_job_asset_file(job_args: &clap::ArgMatches){
-        let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
-        let asset_filename = job_args.value_of("filename").unwrap(); // required arg, safe to simply unwrap
-        let text_response = api_client::get_job_asset_file(&job_id[..], &asset_filename[..]);
-        println!("{}", text_response);
+fn call_get_job_asset_file(job_args: &clap::ArgMatches){
+    let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
+    let asset_filename = job_args.value_of("filename").unwrap(); // required arg, safe to simply unwrap
+    let text_response = api_client::get_job_asset_file(&job_id[..], &asset_filename[..]);
+    println!("{}", text_response);
+}
+
+fn call_get_job_asset_list(job_args: &clap::ArgMatches){
+    let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
+    let json_response = api_client::get_job_asset_list(&job_id[..]);
+    if job_args.is_present("formatted") {
+        let format_fields_string = job_args.value_of("formatted").unwrap();
+        let format_fields_string_cleaned = format_fields_string.replace(" ","");
+        let format_fields = format_fields_string_cleaned.split(",").collect();
+        print_formatted(&json_response, format_fields);
+    } else {
+        println!("{}", json_response);
     }
+}
 
-    fn call_get_job_asset_list(job_args: &clap::ArgMatches){
-        let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
-        let json_response = api_client::get_job_asset_list(&job_id[..]);
-        if job_args.is_present("formatted") {
-            let format_fields_string = job_args.value_of("formatted").unwrap();
-            let format_fields_string_cleaned = format_fields_string.replace(" ","");
-            let format_fields = format_fields_string_cleaned.split(",").collect();
-            print_formatted(&json_response, format_fields);
-        } else {
-            println!("{}", json_response);
+fn print_formatted_jsonstring(json_str: &str, field_names: Vec<&str>) -> serde_json::Value {
+
+    let json: serde_json::Value = match serde_json::from_str(&json_str) {
+        Ok(json) => json,
+        Err(e) => {
+            let error = json!({
+                "error": "serde deserialization error",
+                "original_error": e.to_string()
+            });
+            error
         }
+    };
+
+    print_formatted(&json, field_names);
+    json
+}
+
+fn print_formatted(json: &serde_json::Value, field_names: Vec<&str>) {
+    //println!("[DEBUG] passed to print_formatted(): {}\n{:#?}", json, field_names);
+    let mut field_vals_vec: std::vec::Vec<std::collections::HashMap<String,String>> = vec![];
+    let mut field_lens: std::collections::HashMap<String,usize> = HashMap::new();
+    for field in &field_names{
+        field_lens.insert(field.to_string(), field.len());
     }
-
-
-
-    fn print_formatted(json: &serde_json::Value, field_names: Vec<&str>) {
-        //println!("[DEBUG] passed to print_formatted(): {}\n{:#?}", json, field_names);
-        let mut field_vals_vec: std::vec::Vec<std::collections::HashMap<String,String>> = vec![];
-        let mut field_lens: std::collections::HashMap<String,usize> = HashMap::new();
-        for field in &field_names{
-            field_lens.insert(field.to_string(), field.len());
-        }
-        if json.is_array() {
-            for json_item in json.as_array().unwrap().iter(){
-                let mut fields_map: std::collections::HashMap<String,String> = HashMap::new();
-                for field_name in &field_names {
-                    // println!("{:#?}", field_name);
-                    let json_object = json_item.as_object().unwrap();
-                    if json_object.contains_key(&field_name.to_string()) {
-                        let field_val = json_object.get(&field_name.to_string()).unwrap().to_string().replace("\"", "");
-                        fields_map.insert(field_name.to_string(), field_val);
-                        let current_val_len = json_object.get(&field_name.to_string()).unwrap().to_string().len();
-                        let record_len = field_lens.get(&field_name.to_string()).unwrap();
-                        if &current_val_len > record_len { 
-                            field_lens.insert(field_name.to_string(), current_val_len); 
-                        }
-                    }
-    
-                }
-                field_vals_vec.push(fields_map);
-            }
-        } else {
+    if json.is_array() {
+        for json_item in json.as_array().unwrap().iter(){
             let mut fields_map: std::collections::HashMap<String,String> = HashMap::new();
             for field_name in &field_names {
                 // println!("{:#?}", field_name);
-                let json_object = json.as_object().unwrap();
+                let json_object = json_item.as_object().unwrap();
                 if json_object.contains_key(&field_name.to_string()) {
                     let field_val = json_object.get(&field_name.to_string()).unwrap().to_string().replace("\"", "");
                     fields_map.insert(field_name.to_string(), field_val);
@@ -421,32 +432,109 @@ fn main() {
             }
             field_vals_vec.push(fields_map);
         }
-        // print table
+    } else {
+        let mut fields_map: std::collections::HashMap<String,String> = HashMap::new();
         for field_name in &field_names {
-            print!("{val:<width$}",width=field_lens[&field_name[..]]+1, val=field_name)
-        }
-        let mut sum_of_widths = 0;
-        for field in field_lens.iter() {
-            sum_of_widths += field.1;
-        }
-        // add the right-pad width
-        sum_of_widths += field_lens.len();
-        println!("\n{:->width$}", "-", width=sum_of_widths); //repeated sum of field name + num of field names
-        // for each entry in fields_map
-        for entry in field_vals_vec.iter() {
-            for field_name in &field_names {
-                //println!("[DEBUG] current vals_vec entry {:#?}, field_name {}", &entry, &field_name);
-                let record_width = field_lens[&field_name[..]];
-                // if field name from user is not in saucelabs returned object, print blank space in table
-                if entry.contains_key(&field_name[..]){
-                    let field_val: String = entry.get(&field_name[..]).unwrap().to_string();
-                    print!("{:<width$}", &field_val, width=record_width+1);
-                }else{
-                    print!("{:<width$}", "", width=record_width+1);
+            // println!("{:#?}", field_name);
+            let json_object = json.as_object().unwrap();
+            if json_object.contains_key(&field_name.to_string()) {
+                let field_val = json_object.get(&field_name.to_string()).unwrap().to_string().replace("\"", "");
+                fields_map.insert(field_name.to_string(), field_val);
+                let current_val_len = json_object.get(&field_name.to_string()).unwrap().to_string().len();
+                let record_len = field_lens.get(&field_name.to_string()).unwrap();
+                if &current_val_len > record_len { 
+                    field_lens.insert(field_name.to_string(), current_val_len); 
                 }
             }
-            println!();
+
+        }
+        field_vals_vec.push(fields_map);
+    }
+    // print table
+    for field_name in &field_names {
+        print!("{val:<width$}",width=field_lens[&field_name[..]]+1, val=field_name)
+    }
+    let mut sum_of_widths = 0;
+    for field in field_lens.iter() {
+        sum_of_widths += field.1;
+    }
+    // add the right-pad width
+    sum_of_widths += field_lens.len();
+    println!("\n{:->width$}", "-", width=sum_of_widths); //repeated sum of field name + num of field names
+    // for each entry in fields_map
+    for entry in field_vals_vec.iter() {
+        for field_name in &field_names {
+            //println!("[DEBUG] current vals_vec entry {:#?}, field_name {}", &entry, &field_name);
+            let record_width = field_lens[&field_name[..]];
+            // if field name from user is not in saucelabs returned object, print blank space in table
+            if entry.contains_key(&field_name[..]){
+                let field_val: String = entry.get(&field_name[..]).unwrap().to_string();
+                print!("{:<width$}", &field_val, width=record_width+1);
+            }else{
+                print!("{:<width$}", "", width=record_width+1);
+            }
         }
         println!();
+    }
+    println!();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_api_status(){
+        let json_response = api_client::get_api_status();
+        let json = match json_response {
+            Ok(json) => json,
+            Err(e) => panic!(e)
+        };
+        assert!(json.contains("service_operational"));
+        assert!(json.contains("status_message"));
+    }
+
+    #[test]
+    fn test_call_get_supported_platforms() {
+        let json_response = api_client::get_supported_platforms("webdriver");
+        let json = match json_response {
+            Ok(json) => json,
+            Err(e) => panic!(e)
+        };
+        assert!(json.contains("api_name"));
+    }
+
+    #[test]
+    fn test_call_get_tunnels() {
+        let json_response = api_client::get_tunnels();
+        let json = match json_response {
+            Ok(json) => json,
+            Err(e) => panic!(e)
+        };
+        assert!(json.contains("[]"));
+    }
+
+    #[test]
+    fn test_print_formatted_jsonstring_bad_json() {
+        let bad_json_string = r#"{
+            "bad": "formatting
+        }"#;
+        let name_vec_error = vec!["error"];
+        let response = print_formatted_jsonstring(bad_json_string, name_vec_error);
+        assert!( response.as_object().unwrap().contains_key("error") );
+        assert!( response.as_object().unwrap()["error"] == "serde deserialization error" );
+        assert!( response.as_object().unwrap().contains_key("original_error") );
+        assert!( response.as_object().unwrap()["original_error"].as_str().unwrap().contains("found while parsing a string at line") );
+    }
+
+    #[test]
+    fn test_print_formatted_jsonstring_valid_json() {
+        let bad_json_string = r#"{
+            "valid": "valid formatting"
+        }"#;
+        let name_vec_error = vec!["error"];
+        let response = print_formatted_jsonstring(bad_json_string, name_vec_error);
+        assert!( response.as_object().unwrap().contains_key("valid") );
+        assert!( response.as_object().unwrap()["valid"] == "valid formatting" );
     }
 }

@@ -22,79 +22,44 @@ static SUPPORTED_PLATFORMS_PATH: &'static str = "info/platforms/{{AUTOMATION_API
 /**
  * returns the "healthcheck" api status from Saucelabs API
  */
-pub fn get_api_status() -> serde_json::Value {
+pub fn get_api_status() -> Result<String, reqwest::Error> {
 
     let client = reqwest::blocking::Client::new();
-    let resp = client
+    let body = client
         .get(&format!("{}{}", &SAUCE_API_URL, &API_STATUS_PATH))
         .timeout(Duration::from_secs(120))
-        .send().unwrap();
-    
-    let body = resp.text().unwrap();
-    let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
+        .send()?.text()?;
 
-    json
+    Ok(body)
 }
 
 /**
  * returns platforms supported, by API (appium | webdriver)
  */
-pub fn get_supported_platforms(automation_api: &str) -> serde_json::Value {
+pub fn get_supported_platforms(automation_api: &str) -> Result<String, reqwest::Error> {
 
     let client = reqwest::blocking::Client::new();
-    let resp = client
+    let body = client
         .get(&format!("{}{}", &SAUCE_API_URL, &SUPPORTED_PLATFORMS_PATH.replace("{{AUTOMATION_API}}", &automation_api)))
         .timeout(Duration::from_secs(120))
-        .send().unwrap();
+        .send()?.text()?;
     
-    let body = resp.text().unwrap();
-    let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
-
-    json
+    Ok(body)
 }
 
-/**
- * Load the saucelabs credentials from environment variables
- */
-fn load_sauce_credentials() -> (String,String) {
-
-    let sauce_username: String;
-    match env::var("SAUCE_USERNAME") {
-        Ok(v) => sauce_username = (*v).to_string(),
-        Err(e) => {
-            println!("Error reading SAUCE_USERNAME: {}", e);
-            std::process::exit(1);
-        }
-    }
-
-    let sauce_access_key:  String;
-    match env::var("SAUCE_ACCESS_KEY") {
-        Ok(v) => sauce_access_key = (*v).to_string(),
-        Err(e) => {
-            println!("Error reading SAUCE_ACCESS_KEY: {}", e);
-            std::process::exit(1);
-        }
-    }
-
-    (sauce_username, sauce_access_key)
-}
-
-pub fn get_tunnels() -> serde_json::Value {
+pub fn get_tunnels() -> Result<String, reqwest::Error> {
 
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
 
     //curl -u USERNAME:ACCESS_KEY https://saucelabs.com/rest/v1/USERNAME/tunnels
     let client = reqwest::blocking::Client::new();
-    let resp = client
+    let body = client
         .get(&format!("{}{}", &SAUCE_API_URL, &TUNNELS_PATH.replace("{{USERNAME}}", &sauce_username)))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
-        .send().unwrap();
-    let body = resp.text().unwrap();
-    let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
+        .send()?.text()?;
 
-    json
-
+    Ok(body)
 }
 
 pub fn get_tunnel(tunnel_id: &str) -> serde_json::Value {
@@ -263,4 +228,30 @@ pub fn get_job_asset_list(job_id: &str) -> serde_json::Value{
     let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
     
     json
+}
+
+/**
+ * Load the saucelabs credentials from environment variables
+ */
+fn load_sauce_credentials() -> (String,String) {
+
+    let sauce_username: String;
+    match env::var("SAUCE_USERNAME") {
+        Ok(v) => sauce_username = (*v).to_string(),
+        Err(e) => {
+            println!("Error reading SAUCE_USERNAME: {}", e);
+            std::process::exit(1);
+        }
+    }
+
+    let sauce_access_key:  String;
+    match env::var("SAUCE_ACCESS_KEY") {
+        Ok(v) => sauce_access_key = (*v).to_string(),
+        Err(e) => {
+            println!("Error reading SAUCE_ACCESS_KEY: {}", e);
+            std::process::exit(1);
+        }
+    }
+
+    (sauce_username, sauce_access_key)
 }
