@@ -336,8 +336,10 @@ fn call_get_uploads(job_args: &clap::ArgMatches){
         let format_fields_string_cleaned = format_fields_string.replace(" ","");
         let format_fields = format_fields_string_cleaned.split(",").collect();
         // get serde_json value of the string, extract the array (below), convert to string? and pretty print the file array
-        let json_file_array = json_response.get("files").unwrap();
-        print_formatted_jsonstring(&json_file_array, format_fields);
+        let json_object: serde_json::Value = serde_json::from_str(&&json_string[..]).unwrap();
+        let json_files_array = json_object.get("files").unwrap();
+        // we have a serde_json array, use print_formatted directly
+        print_formatted(&json_files_array, format_fields);
     } else {
         println!("{}", json_string);
     }
