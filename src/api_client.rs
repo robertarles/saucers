@@ -126,40 +126,36 @@ pub fn get_uploads() -> Result<String, reqwest::Error> {
 /**
  * return a list of jobs
  */
-pub fn get_jobs(max: &str) -> serde_json::Value {
+pub fn get_jobs(max: &str) -> Result<String, reqwest::Error> {
 
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
     
     let jobs_params = format!("?limit={}&full=true", max);
     let client = reqwest::blocking::Client::new();
-    let resp = client
+    let body = client
         .get(&format!("{}{}{}", &SAUCE_API_URL, &GET_JOBS_PATH, &jobs_params))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
-        .send().unwrap();
-    let body = resp.text().unwrap();
-    let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
+        .send()?.text()?;
 
-    json
+    Ok(body)
 }
 
 /**
  * get a specific jobs details
  */
-pub fn get_job(job_id: &str) -> serde_json::Value {
+pub fn get_job(job_id: &str) -> Result<String, reqwest::Error>  {
 
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
     
     let client = reqwest::blocking::Client::new();
-    let resp = client
+    let body = client
         .get(&format!("{}{}/{}", &SAUCE_API_URL, &GET_JOB_PATH, &job_id))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
-        .send().unwrap();
-    let body = resp.text().unwrap();
-    let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
+        .send()?.text()?;
     
-    json
+    Ok(body)
 }
 
 /**

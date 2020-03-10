@@ -352,26 +352,34 @@ fn call_get_jobs(job_args: &clap::ArgMatches){
         max = job_args.value_of("max").unwrap().to_string();
     };
     let json_response = api_client::get_jobs(&max[..]);
+    let json_string = match json_response {
+        Ok(json_string) => json_string,
+        Err(e) => panic!(e)
+    };
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ","");
         let format_fields = format_fields_string_cleaned.split(",").collect();
-        print_formatted(&json_response, format_fields);
+        print_formatted_jsonstring(&json_string, format_fields);
     } else {
-        println!("{}", json_response);
+        println!("{}", json_string);
     }
 }
 
 fn call_get_job(job_args: &clap::ArgMatches){
     let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
     let json_response = api_client::get_job(&job_id[..]);
+    let json_string = match json_response {
+        Ok(json_string) => json_string,
+        Err(e) => panic!(e)
+    };
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ","");
         let format_fields = format_fields_string_cleaned.split(",").collect();
-        print_formatted(&json_response, format_fields);
+        print_formatted_jsonstring(&json_string, format_fields);
     } else {
-        println!("{}", json_response);
+        println!("{}", json_string);
     }
 }
 
@@ -531,7 +539,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_tunne_jobs() {
+    fn test_get_tunnel_jobs() {
         let json_response = api_client::get_tunnel_jobs("asdf");
         let json = match json_response {
             Ok(json) => json,
@@ -568,8 +576,31 @@ mod tests {
             Ok(json) => json,
             Err(e) => panic!(e)
         };
+        // check for what should be the beginning of the response
+        assert!(json_string.contains(r#"{"files":[{""#));
+    }
 
-        assert!(json_string.contains(r#"{"files":[{""#)); // check for what should be the beginning of the response
+    #[test]
+    fn test_get_jobs() {
+        let json_response = api_client::get_jobs("1");
+        let json_string = match json_response {
+            Ok(json) => json,
+            Err(e) => panic!(e)
+        };
+        // check for what should be the beginning of the response
+        // is there a better way to test this while not knowing if any jobs will be running (empty array [] or json objects in the array?)
+        assert!(json_string.starts_with("["));
+    }
+
+    #[test]
+    fn test_get_job() {
+        let json_response = api_client::get_job("1");
+        let json_string = match json_response {
+            Ok(json) => json,
+            Err(e) => panic!(e)
+        };
+        // we checked for a nonexistent job id, we should get a 'failure' message from the API
+        assert!(json_string.contains("Not found"));
     }
 
     #[test]
