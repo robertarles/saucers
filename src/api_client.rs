@@ -62,76 +62,65 @@ pub fn get_tunnels() -> Result<String, reqwest::Error> {
     Ok(body)
 }
 
-pub fn get_tunnel(tunnel_id: &str) -> serde_json::Value {
+pub fn get_tunnel(tunnel_id: &str) -> Result<String, reqwest::Error> {
 
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
 
     let client = reqwest::blocking::Client::new();
-    let resp = client
+    let body = client
         .get(&format!("{}{}", &SAUCE_API_URL, &TUNNEL_JOB_PATH.replace("{{USERNAME}}", &sauce_username).replace("{{TUNNEL_ID}}", tunnel_id)))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
-        .send().unwrap();
-    let body = resp.text().unwrap();
-    let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
+        .send()?.text()?;
 
-    json
+    Ok(body)
 
 }
-pub fn get_tunnel_jobs(tunnel_id: &str) -> serde_json::Value {
+pub fn get_tunnel_jobs(tunnel_id: &str) -> Result<String, reqwest::Error> { 
 
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
 
     let client = reqwest::blocking::Client::new();
-    let resp = client
+    let body = client
         .get(&format!("{}{}", &SAUCE_API_URL, &TUNNEL_JOBS_PATH.replace("{{USERNAME}}", &sauce_username).replace("{{TUNNEL_ID}}", tunnel_id)))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
-        .send().unwrap();
-    let body = resp.text().unwrap();
-    let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
+        .send()?.text()?;
 
-    json
+    Ok(body)
 
 }
 
-pub fn post_upload(filename: &str) -> serde_json::Value {
+pub fn post_upload(filename: &str) -> Result<String, reqwest::Error> {
 
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
 
     let path = Path::new(&filename);
-    // let file_path = path.parent().unwrap();
     let file_name = path.file_name().unwrap().to_str().unwrap();
-    // let mut file_stem = path.file_stem().unwrap().to_str().unwrap();
 
     let file = File::open(&filename).unwrap();
-    let resp = reqwest::blocking::Client::new()
+    let body = reqwest::blocking::Client::new()
         .post(&format!("{}{}/{}/{}?overwrite=true", &SAUCE_API_URL, &UPLOADS_PATH, &sauce_username, &file_name))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
         .body(file)
-        .send().unwrap(); // map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, "Invalid server return")).unwrap();
+        .send()?.text()?;
     
-    let body = resp.text().unwrap();
-    let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
-    println!("[DEBUG] json [{:#?}]", json);
-    json
+    Ok(body)
 }
 
-pub fn get_uploads() -> serde_json::Value {
+pub fn get_uploads() -> Result<String, reqwest::Error> {
 
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
 
     let client = reqwest::blocking::Client::new();
-    let resp = client
+    let body = client
         .get(&format!("{}{}/{}", &SAUCE_API_URL, &UPLOADS_PATH, &sauce_username))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
-        .send().unwrap();
-    let body = resp.text().unwrap();
-    let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
+        .send()?.text()?;
 
-    json
+    Ok(body)
 }
 
 /**

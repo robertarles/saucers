@@ -228,13 +228,17 @@ fn main() {
 fn call_post_upload(job_args: &clap::ArgMatches){
     let filename = job_args.value_of("filename").unwrap();
     let json_response = api_client::post_upload(filename);
+    let json_string = match json_response {
+        Ok(json_string) => json_string,
+        Err(e) => panic!(e)
+    };
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ","");
         let format_fields = format_fields_string_cleaned.split(",").collect();
-        print_formatted(&json_response, format_fields);
+        print_formatted_jsonstring(&json_string, format_fields);
     } else {
-        println!("{}", json_response);
+        println!("{}", json_string);
     }
 }
 
@@ -290,39 +294,52 @@ fn call_get_tunnels(job_args: &clap::ArgMatches){
 fn call_get_tunnel(job_args: &clap::ArgMatches){
     let tunnel_id = job_args.value_of("tunnel_id").unwrap();
     let json_response = api_client::get_tunnel(tunnel_id);
+    let json_string = match json_response {
+        Ok(json_string) => json_string,
+        Err(e) => panic!(e)
+    };
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ","");
         let format_fields = format_fields_string_cleaned.split(",").collect();
-        print_formatted(&json_response, format_fields);
+        print_formatted_jsonstring(&json_string, format_fields);
     } else {
-        println!("{}", json_response);
+        println!("{}", json_string);
     }
 }
 
 fn call_get_tunnel_jobs(job_args: &clap::ArgMatches){
     let tunnel_id = job_args.value_of("tunnel_id").unwrap();
     let json_response = api_client::get_tunnel_jobs(tunnel_id);
+    let json_string = match json_response {
+        Ok(json_string) => json_string,
+        Err(e) => panic!(e)
+    };
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ","");
         let format_fields = format_fields_string_cleaned.split(",").collect();
-        print_formatted(&json_response, format_fields);
+        print_formatted_jsonstring(&json_string, format_fields);
     } else {
-        println!("{}", json_response);
+        println!("{}", json_string);
     }
 }
 
 fn call_get_uploads(job_args: &clap::ArgMatches){
     let json_response = api_client::get_uploads();
+    let json_string = match json_response {
+        Ok(json_string) => json_string,
+        Err(e) => panic!(e)
+    };
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ","");
         let format_fields = format_fields_string_cleaned.split(",").collect();
+        // get serde_json value of the string, extract the array (below), convert to string? and pretty print the file array
         let json_file_array = json_response.get("files").unwrap();
-        print_formatted(&json_file_array, format_fields);
+        print_formatted_jsonstring(&json_file_array, format_fields);
     } else {
-        println!("{}", json_response);
+        println!("{}", json_string);
     }
 }
 
@@ -407,7 +424,6 @@ fn print_formatted_jsonstring(json_str: &str, field_names: Vec<&str>) -> serde_j
 }
 
 fn print_formatted(json: &serde_json::Value, field_names: Vec<&str>) {
-    //println!("[DEBUG] passed to print_formatted(): {}\n{:#?}", json, field_names);
     let mut field_vals_vec: std::vec::Vec<std::collections::HashMap<String,String>> = vec![];
     let mut field_lens: std::collections::HashMap<String,usize> = HashMap::new();
     for field in &field_names{
@@ -417,7 +433,6 @@ fn print_formatted(json: &serde_json::Value, field_names: Vec<&str>) {
         for json_item in json.as_array().unwrap().iter(){
             let mut fields_map: std::collections::HashMap<String,String> = HashMap::new();
             for field_name in &field_names {
-                // println!("{:#?}", field_name);
                 let json_object = json_item.as_object().unwrap();
                 if json_object.contains_key(&field_name.to_string()) {
                     let field_val = json_object.get(&field_name.to_string()).unwrap().to_string().replace("\"", "");
@@ -464,7 +479,6 @@ fn print_formatted(json: &serde_json::Value, field_names: Vec<&str>) {
     // for each entry in fields_map
     for entry in field_vals_vec.iter() {
         for field_name in &field_names {
-            //println!("[DEBUG] current vals_vec entry {:#?}, field_name {}", &entry, &field_name);
             let record_width = field_lens[&field_name[..]];
             // if field name from user is not in saucelabs returned object, print blank space in table
             if entry.contains_key(&field_name[..]){
@@ -495,7 +509,7 @@ mod tests {
     }
 
     #[test]
-    fn test_call_get_supported_platforms() {
+    fn test_get_supported_platforms() {
         let json_response = api_client::get_supported_platforms("webdriver");
         let json = match json_response {
             Ok(json) => json,
@@ -505,13 +519,55 @@ mod tests {
     }
 
     #[test]
-    fn test_call_get_tunnels() {
+    fn test_get_tunnel() {
+        let json_response = api_client::get_tunnel("asdf");
+        let json = match json_response {
+            Ok(json) => json,
+            Err(e) => panic!(e)
+        };
+        assert!(json.contains("Tunnel not found"));
+    }
+
+    #[test]
+    fn test_get_tunne_jobs() {
+        let json_response = api_client::get_tunnel_jobs("asdf");
+        let json = match json_response {
+            Ok(json) => json,
+            Err(e) => panic!(e)
+        };
+        assert!(json.contains("Not Found"));
+    }
+
+    #[test]
+    fn test_get_tunnels() {
         let json_response = api_client::get_tunnels();
         let json = match json_response {
             Ok(json) => json,
             Err(e) => panic!(e)
         };
         assert!(json.contains("[]"));
+    }
+
+    #[test]
+    fn test_post_upload() {
+        let json_response = api_client::post_upload("uploader.tst");
+        let json_string = match json_response {
+            Ok(json) => json,
+            Err(e) => panic!(e)
+        };
+
+        assert!(json_string.contains(r#""filename":"uploader.tst""#));
+    }
+
+    #[test]
+    fn test_get_uploads() {
+        let json_response = api_client::get_uploads();
+        let json_string = match json_response {
+            Ok(json) => json,
+            Err(e) => panic!(e)
+        };
+
+        assert!(json_string.contains(r#"{"files":[{""#)); // check for what should be the beginning of the response
     }
 
     #[test]
