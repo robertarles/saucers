@@ -198,20 +198,18 @@ pub fn get_job_asset_file(job_id: &str, asset_filename: &str) -> String {
 /**
  * get the asset list associated with a particular job ID
  */
-pub fn get_job_asset_list(job_id: &str) -> serde_json::Value{
+pub fn get_job_asset_list(job_id: &str) -> Result<String, reqwest::Error> {
     
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
     
     let client = reqwest::blocking::Client::new();
-    let resp = client
+    let body = client
         .get(&format!("{}{}/jobs/{}/assets", &SAUCE_API_URL, &sauce_username, &job_id))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
-        .send().unwrap();
-    let body = resp.text().unwrap();
-    let json: serde_json::Value = serde_json::from_str(&body).expect("JSON was not well-formatted");
+        .send()?.text()?;
     
-    json
+    Ok(body)
 }
 
 /**

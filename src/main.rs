@@ -411,13 +411,17 @@ fn call_get_job_asset_file(job_args: &clap::ArgMatches){
 fn call_get_job_asset_list(job_args: &clap::ArgMatches){
     let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
     let json_response = api_client::get_job_asset_list(&job_id[..]);
+    let json_string = match json_response {
+        Ok(json_string) => json_string,
+        Err(e) => panic!(e)
+    };
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ","");
         let format_fields = format_fields_string_cleaned.split(",").collect();
-        print_formatted(&json_response, format_fields);
+        print_formatted_jsonstring(&json_string, format_fields);
     } else {
-        println!("{}", json_response);
+        println!("{}", json_string);
     }
 }
 
@@ -616,6 +620,17 @@ mod tests {
             Err(e) => panic!(e)
         };
         // we tried to stop a nonexistent job id, we should get a 'failure' message from the API
+        assert!(json_string.contains("Not found"));
+    }
+
+    #[test]
+    fn test_get_job_asset_list() {
+        let json_response = api_client::get_job_asset_list("1");
+        let json_string = match json_response {
+            Ok(json) => json,
+            Err(e) => panic!(e)
+        };
+        // we tried to get a list from a nonexistent job id, we should get a 'failure' message from the API
         assert!(json_string.contains("Not found"));
     }
 
