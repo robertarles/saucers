@@ -1,5 +1,6 @@
 # saucers
 
+[DEPRECATED] My experiment with Rust was fun,I actually love the language. In the end, if I add features, though, I'll be doing it in the Go implementation. See [sauceutil](https://github.com/robertarles/sauceutil) instead
 A command line utility to interface with the saucelabs API.
 
 It is expected that you already have the environment variables SAUCE_USERNAME and SAUCE_ACCESS_KEY set in your command line environment. 
