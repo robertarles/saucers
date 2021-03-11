@@ -10,6 +10,8 @@ For Windows, this can be set in Start | System Information | System Properties |
 
 Your 'username' and 'access_key' can be found here [https://app.saucelabs.com/user-settings](https://app.saucelabs.com/user-settings)
 
+*Note:* If you have node/npm installed, check out Saucelabs own https://www.npmjs.com/package/saucelabs, it's a complete API client implementation.
+
 ## Help
 
 `saucers --help`
