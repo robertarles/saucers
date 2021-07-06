@@ -1,12 +1,11 @@
 use std::env;
-use std::path::Path;
 use std::fs::File;
+use std::path::Path;
 use std::time::Duration;
 
 extern crate reqwest;
 extern crate serde;
 extern crate serde_json;
-
 
 static SAUCE_API_URL: &'static str = "https://saucelabs.com/rest/v1/";
 static API_STATUS_PATH: &'static str = "info/status";
@@ -23,12 +22,12 @@ static SUPPORTED_PLATFORMS_PATH: &'static str = "info/platforms/{{AUTOMATION_API
  * returns the "healthcheck" api status from Saucelabs API
  */
 pub fn get_api_status() -> Result<String, reqwest::Error> {
-
     let client = reqwest::blocking::Client::new();
     let body = client
         .get(&format!("{}{}", &SAUCE_API_URL, &API_STATUS_PATH))
         .timeout(Duration::from_secs(120))
-        .send()?.text()?;
+        .send()?
+        .text()?;
 
     Ok(body)
 }
@@ -37,62 +36,78 @@ pub fn get_api_status() -> Result<String, reqwest::Error> {
  * returns platforms supported, by API (appium | webdriver)
  */
 pub fn get_supported_platforms(automation_api: &str) -> Result<String, reqwest::Error> {
-
     let client = reqwest::blocking::Client::new();
     let body = client
-        .get(&format!("{}{}", &SAUCE_API_URL, &SUPPORTED_PLATFORMS_PATH.replace("{{AUTOMATION_API}}", &automation_api)))
+        .get(&format!(
+            "{}{}",
+            &SAUCE_API_URL,
+            &SUPPORTED_PLATFORMS_PATH.replace("{{AUTOMATION_API}}", &automation_api)
+        ))
         .timeout(Duration::from_secs(120))
-        .send()?.text()?;
-    
+        .send()?
+        .text()?;
     Ok(body)
 }
 
 pub fn get_tunnels() -> Result<String, reqwest::Error> {
-
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
 
     //curl -u USERNAME:ACCESS_KEY https://saucelabs.com/rest/v1/USERNAME/tunnels
     let client = reqwest::blocking::Client::new();
     let body = client
-        .get(&format!("{}{}", &SAUCE_API_URL, &TUNNELS_PATH.replace("{{USERNAME}}", &sauce_username)))
+        .get(&format!(
+            "{}{}",
+            &SAUCE_API_URL,
+            &TUNNELS_PATH.replace("{{USERNAME}}", &sauce_username)
+        ))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
-        .send()?.text()?;
+        .send()?
+        .text()?;
 
     Ok(body)
 }
 
 pub fn get_tunnel(tunnel_id: &str) -> Result<String, reqwest::Error> {
-
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
 
     let client = reqwest::blocking::Client::new();
     let body = client
-        .get(&format!("{}{}", &SAUCE_API_URL, &TUNNEL_JOB_PATH.replace("{{USERNAME}}", &sauce_username).replace("{{TUNNEL_ID}}", tunnel_id)))
+        .get(&format!(
+            "{}{}",
+            &SAUCE_API_URL,
+            &TUNNEL_JOB_PATH
+                .replace("{{USERNAME}}", &sauce_username)
+                .replace("{{TUNNEL_ID}}", tunnel_id)
+        ))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
-        .send()?.text()?;
+        .send()?
+        .text()?;
 
     Ok(body)
-
 }
-pub fn get_tunnel_jobs(tunnel_id: &str) -> Result<String, reqwest::Error> { 
-
+pub fn get_tunnel_jobs(tunnel_id: &str) -> Result<String, reqwest::Error> {
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
 
     let client = reqwest::blocking::Client::new();
     let body = client
-        .get(&format!("{}{}", &SAUCE_API_URL, &TUNNEL_JOBS_PATH.replace("{{USERNAME}}", &sauce_username).replace("{{TUNNEL_ID}}", tunnel_id)))
+        .get(&format!(
+            "{}{}",
+            &SAUCE_API_URL,
+            &TUNNEL_JOBS_PATH
+                .replace("{{USERNAME}}", &sauce_username)
+                .replace("{{TUNNEL_ID}}", tunnel_id)
+        ))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
-        .send()?.text()?;
+        .send()?
+        .text()?;
 
     Ok(body)
-
 }
 
 pub fn post_upload(filename: &str) -> Result<String, reqwest::Error> {
-
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
 
     let path = Path::new(&filename);
@@ -100,25 +115,31 @@ pub fn post_upload(filename: &str) -> Result<String, reqwest::Error> {
 
     let file = File::open(&filename).unwrap();
     let body = reqwest::blocking::Client::new()
-        .post(&format!("{}{}/{}/{}?overwrite=true", &SAUCE_API_URL, &UPLOADS_PATH, &sauce_username, &file_name))
+        .post(&format!(
+            "{}{}/{}/{}?overwrite=true",
+            &SAUCE_API_URL, &UPLOADS_PATH, &sauce_username, &file_name
+        ))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
         .body(file)
-        .send()?.text()?;
-    
+        .send()?
+        .text()?;
     Ok(body)
 }
 
 pub fn get_uploads() -> Result<String, reqwest::Error> {
-
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
 
     let client = reqwest::blocking::Client::new();
     let body = client
-        .get(&format!("{}{}/{}", &SAUCE_API_URL, &UPLOADS_PATH, &sauce_username))
+        .get(&format!(
+            "{}{}/{}",
+            &SAUCE_API_URL, &UPLOADS_PATH, &sauce_username
+        ))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
-        .send()?.text()?;
+        .send()?
+        .text()?;
 
     Ok(body)
 }
@@ -127,16 +148,18 @@ pub fn get_uploads() -> Result<String, reqwest::Error> {
  * return a list of jobs
  */
 pub fn get_jobs(max: &str) -> Result<String, reqwest::Error> {
-
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
-    
     let jobs_params = format!("?limit={}&full=true", max);
     let client = reqwest::blocking::Client::new();
     let body = client
-        .get(&format!("{}{}{}", &SAUCE_API_URL, &GET_JOBS_PATH, &jobs_params))
+        .get(&format!(
+            "{}{}{}",
+            &SAUCE_API_URL, &GET_JOBS_PATH, &jobs_params
+        ))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
-        .send()?.text()?;
+        .send()?
+        .text()?;
 
     Ok(body)
 }
@@ -144,33 +167,37 @@ pub fn get_jobs(max: &str) -> Result<String, reqwest::Error> {
 /**
  * get a specific jobs details
  */
-pub fn get_job(job_id: &str) -> Result<String, reqwest::Error>  {
-
+pub fn get_job(job_id: &str) -> Result<String, reqwest::Error> {
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
-    
     let client = reqwest::blocking::Client::new();
     let body = client
         .get(&format!("{}{}/{}", &SAUCE_API_URL, &GET_JOB_PATH, &job_id))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
-        .send()?.text()?;
-    
+        .send()?
+        .text()?;
     Ok(body)
 }
 
 /**
  * stop a specific job
  */
-pub fn stop_job(job_id: &str) -> Result<String, reqwest::Error>  {
-
+pub fn stop_job(job_id: &str) -> Result<String, reqwest::Error> {
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
 
     let client = reqwest::blocking::Client::new();
     let body = client
-        .put(&format!( "{}{}", &SAUCE_API_URL, &STOP_JOB_PATH.replace("{{USERNAME}}", &sauce_username).replace("{{JOB_ID}}", &job_id) ))
+        .put(&format!(
+            "{}{}",
+            &SAUCE_API_URL,
+            &STOP_JOB_PATH
+                .replace("{{USERNAME}}", &sauce_username)
+                .replace("{{JOB_ID}}", &job_id)
+        ))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
-        .send()?.text()?;
+        .send()?
+        .text()?;
 
     Ok(body)
 }
@@ -181,17 +208,18 @@ pub fn stop_job(job_id: &str) -> Result<String, reqwest::Error>  {
  *  selenium-server.log, video.mp4, XXXXscreenshot.png (where XXXX is a number between 0000 and 9999), final_screenshot.png
  */
 pub fn get_job_asset_file(job_id: &str, asset_filename: &str) -> String {
-    
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
-    
     let client = reqwest::blocking::Client::new();
     let resp = client
-        .get(&format!("{}{}/jobs/{}/assets/{}", &SAUCE_API_URL, &sauce_username, &job_id, &asset_filename))
+        .get(&format!(
+            "{}{}/jobs/{}/assets/{}",
+            &SAUCE_API_URL, &sauce_username, &job_id, &asset_filename
+        ))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
-        .send().unwrap();
+        .send()
+        .unwrap();
     let body = resp.text().unwrap();
-    
     body
 }
 
@@ -199,24 +227,24 @@ pub fn get_job_asset_file(job_id: &str, asset_filename: &str) -> String {
  * get the asset list associated with a particular job ID
  */
 pub fn get_job_asset_list(job_id: &str) -> Result<String, reqwest::Error> {
-    
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
-    
     let client = reqwest::blocking::Client::new();
     let body = client
-        .get(&format!("{}{}/jobs/{}/assets", &SAUCE_API_URL, &sauce_username, &job_id))
+        .get(&format!(
+            "{}{}/jobs/{}/assets",
+            &SAUCE_API_URL, &sauce_username, &job_id
+        ))
         .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
         .timeout(Duration::from_secs(120))
-        .send()?.text()?;
-    
+        .send()?
+        .text()?;
     Ok(body)
 }
 
 /**
  * Load the saucelabs credentials from environment variables
  */
-fn load_sauce_credentials() -> (String,String) {
-
+fn load_sauce_credentials() -> (String, String) {
     let sauce_username: String;
     match env::var("SAUCE_USERNAME") {
         Ok(v) => sauce_username = (*v).to_string(),
@@ -226,7 +254,7 @@ fn load_sauce_credentials() -> (String,String) {
         }
     }
 
-    let sauce_access_key:  String;
+    let sauce_access_key: String;
     match env::var("SAUCE_ACCESS_KEY") {
         Ok(v) => sauce_access_key = (*v).to_string(),
         Err(e) => {
