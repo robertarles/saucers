@@ -29,7 +29,7 @@ pub async fn download_job_asset(configuration: &configuration::Configuration, id
 
     let local_var_client = &configuration.client;
 
-    let local_var_uri_str = format!("{}/v1/jobs/{id}/{assetName}", configuration.base_path, id=crate::apis::urlencode(id), filename=crate::apis::urlencode(filename), filepath=crate::apis::urlencode(filepath));
+    let local_var_uri_str = format!("{}/v1/jobs/{id}/{filepath}{filename}", configuration.base_path, id=crate::apis::urlencode(id), filename=crate::apis::urlencode(filename), filepath=crate::apis::urlencode(filepath));
     let mut local_var_req_builder = local_var_client.get(local_var_uri_str.as_str());
 
     if let Some(ref local_var_user_agent) = configuration.user_agent {

@@ -1,4 +1,4 @@
-# Rust API client for openapi
+# Rust API client for saucelabs_api
 
 This is a REST API documentation provided by Sauce Labs
 

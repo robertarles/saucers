@@ -1,6 +1,7 @@
 mod api_client;
 use std::collections::HashMap;
 use serde_json::json;
+use saucelabs_api::apis;
 
 extern crate clap;
 use clap::{Arg, App, SubCommand};
@@ -9,7 +10,7 @@ fn main() {
 
     // handle the CLI args
     let matches = App::new("saucers")
-        .version("0.9")
+        .version("0.2")
         .about("\nSaucelabs api util.\nIMPORTANT: This program expects you to have already set your saucelabs credentials in the environment variables SAUCE_USERNAME and SAUCE_ACCESS_KEY (e.g in your .bashrc or .zshrc, or Windows system properties)")
         .subcommand(SubCommand::with_name("apistatus")
             .about("Get the current saucelabs API status.")
@@ -173,8 +174,27 @@ fn main() {
     // select the subcommand to run
     match matches.subcommand_name() {
         Some("apistatus") => {
-            let job_args = matches.subcommand_matches("apistatus").unwrap();
-            call_get_api_status(job_args);
+            //let job_args = matches.subcommand_matches("apistatus").unwrap();
+            let configuration = saucelabs_api::apis::configuration::Configuration::new();
+            //let result: Result<saucelabs_api::models::SauceStatus, saucelabs_api::models::Error> 
+            let result = async {
+                let result = saucelabs_api::apis::info_api::get_status(&configuration).await;
+            };
+            let response = match result {
+                Ok(response) => response,
+                Err(e) => panic!(e)
+            };
+            println!("{}", response.status_message.unwrap());
+            // if job_args.is_present("formatted") {
+            //     let format_fields_string = job_args.value_of("formatted").unwrap();
+            //     let format_fields_string_cleaned = format_fields_string.replace(" ","");
+            //     let format_fields = format_fields_string_cleaned.split(",").collect();
+            //     print_formatted_jsonstring(&json_string, format_fields);
+            // } else {
+            //     println!("{}", json_string);
+            // }
+
+            //call_get_api_status(job_args);
         },
         Some("supportedplatforms") => {
             let job_args = matches.subcommand_matches("supportedplatforms").unwrap();
