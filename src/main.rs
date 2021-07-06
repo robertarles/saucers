@@ -1,5 +1,6 @@
 mod api_client;
 use std::collections::HashMap;
+use std::env;
 use serde_json::json;
 
 extern crate clap;
@@ -13,6 +14,15 @@ fn main() {
         .about("\nSaucelabs api util.\nIMPORTANT: This program expects you to have already set your saucelabs credentials in the environment variables SAUCE_USERNAME and SAUCE_ACCESS_KEY (e.g in your .bashrc or .zshrc, or Windows system properties)")
         .subcommand(SubCommand::with_name("apistatus")
             .about("Get the current saucelabs API status.")
+            .arg(Arg::with_name("formatted")
+                .short("o")
+                .takes_value(true)
+                .required(false)
+                .help("Request output in columnar format, requires field names to include in table (e.g. \"id,status,passed\")")
+            )
+        )
+        .subcommand(SubCommand::with_name("config")
+            .about("Get tool config.")
             .arg(Arg::with_name("formatted")
                 .short("o")
                 .takes_value(true)
@@ -176,6 +186,10 @@ fn main() {
             let job_args = matches.subcommand_matches("apistatus").unwrap();
             call_get_api_status(job_args);
         },
+        Some("config") => {
+            let job_args = matches.subcommand_matches("config").unwrap();
+            call_get_config(job_args);
+        },
         Some("supportedplatforms") => {
             let job_args = matches.subcommand_matches("supportedplatforms").unwrap();
             call_get_supported_platforms(job_args);
@@ -225,12 +239,25 @@ fn main() {
     }
 }
 
+fn call_get_config(job_args: &clap::ArgMatches){
+    let (sauce_username, _) = load_sauce_credentials();
+    let json_string = format!("{{\"SAUCE_USERNAME\": \"{}\"}}", &sauce_username);
+    if job_args.is_present("formatted") {
+        let format_fields_string = job_args.value_of("formatted").unwrap();
+        let format_fields_string_cleaned = format_fields_string.replace(" ","");
+        let format_fields = format_fields_string_cleaned.split(",").collect();
+        print_formatted_jsonstring(&json_string, format_fields);
+    } else {
+        println!("{}", json_string);
+    }
+}
+
 fn call_post_upload(job_args: &clap::ArgMatches){
     let filename = job_args.value_of("filename").unwrap();
     let json_response = api_client::post_upload(filename);
     let json_string = match json_response {
         Ok(json_string) => json_string,
-        Err(e) => panic!(e)
+        Err(e) => panic!("{}",e)
     };
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
@@ -246,7 +273,7 @@ fn call_get_api_status(job_args: &clap::ArgMatches){
     let json_response = api_client::get_api_status();
     let json_string = match json_response {
         Ok(json_string) => json_string,
-        Err(e) => panic!(e)
+        Err(e) => panic!("{}",e)
     };
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
@@ -263,7 +290,7 @@ fn call_get_supported_platforms(job_args: &clap::ArgMatches){
     let json_response = api_client::get_supported_platforms(api);
     let json_string = match json_response {
         Ok(json_string) => json_string,
-        Err(e) => panic!(e)
+        Err(e) => panic!("{}",e)
     };
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
@@ -279,7 +306,7 @@ fn call_get_tunnels(job_args: &clap::ArgMatches){
     let json_response = api_client::get_tunnels();
     let json_string = match json_response {
         Ok(json_string) => json_string,
-        Err(e) => panic!(e)
+        Err(e) => panic!("{}",e)
     };
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
@@ -296,7 +323,7 @@ fn call_get_tunnel(job_args: &clap::ArgMatches){
     let json_response = api_client::get_tunnel(tunnel_id);
     let json_string = match json_response {
         Ok(json_string) => json_string,
-        Err(e) => panic!(e)
+        Err(e) => panic!("{}",e)
     };
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
@@ -313,7 +340,7 @@ fn call_get_tunnel_jobs(job_args: &clap::ArgMatches){
     let json_response = api_client::get_tunnel_jobs(tunnel_id);
     let json_string = match json_response {
         Ok(json_string) => json_string,
-        Err(e) => panic!(e)
+        Err(e) => panic!("{}",e)
     };
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
@@ -329,7 +356,7 @@ fn call_get_uploads(job_args: &clap::ArgMatches){
     let json_response = api_client::get_uploads();
     let json_string = match json_response {
         Ok(json_string) => json_string,
-        Err(e) => panic!(e)
+        Err(e) => panic!("{}",e)
     };
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
@@ -354,7 +381,7 @@ fn call_get_jobs(job_args: &clap::ArgMatches){
     let json_response = api_client::get_jobs(&max[..]);
     let json_string = match json_response {
         Ok(json_string) => json_string,
-        Err(e) => panic!(e)
+        Err(e) => panic!("{}",e)
     };
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
@@ -371,7 +398,7 @@ fn call_get_job(job_args: &clap::ArgMatches){
     let json_response = api_client::get_job(&job_id[..]);
     let json_string = match json_response {
         Ok(json_string) => json_string,
-        Err(e) => panic!(e)
+        Err(e) => panic!("{}",e)
     };
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
@@ -388,7 +415,7 @@ fn call_stop_job(job_args: &clap::ArgMatches){
     let json_response = api_client::stop_job(&job_id[..]);
     let json_string = match json_response {
         Ok(json_string) => json_string,
-        Err(e) => panic!(e)
+        Err(e) => panic!("{}",e)
     };
 
     if job_args.is_present("formatted") {
@@ -413,7 +440,7 @@ fn call_get_job_asset_list(job_args: &clap::ArgMatches){
     let json_response = api_client::get_job_asset_list(&job_id[..]);
     let json_string = match json_response {
         Ok(json_string) => json_string,
-        Err(e) => panic!(e)
+        Err(e) => panic!("{}",e)
     };
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
@@ -512,6 +539,33 @@ fn print_formatted(json: &serde_json::Value, field_names: Vec<&str>) {
     println!();
 }
 
+
+/**
+ * Load the saucelabs credentials from environment variables
+ */
+fn load_sauce_credentials() -> (String,String) {
+
+    let sauce_username: String;
+    match env::var("SAUCE_USERNAME") {
+        Ok(v) => sauce_username = (*v).to_string(),
+        Err(e) => {
+            println!("Error reading SAUCE_USERNAME: {}", e);
+            std::process::exit(1);
+        }
+    }
+
+    let sauce_access_key:  String;
+    match env::var("SAUCE_ACCESS_KEY") {
+        Ok(v) => sauce_access_key = (*v).to_string(),
+        Err(e) => {
+            println!("Error reading SAUCE_ACCESS_KEY: {}", e);
+            std::process::exit(1);
+        }
+    }
+
+    (sauce_username, sauce_access_key)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -521,7 +575,7 @@ mod tests {
         let json_response = api_client::get_api_status();
         let json = match json_response {
             Ok(json) => json,
-            Err(e) => panic!(e)
+            Err(e) => panic!("{}",e)
         };
         assert!(json.contains("service_operational"));
         assert!(json.contains("status_message"));
@@ -532,7 +586,7 @@ mod tests {
         let json_response = api_client::get_supported_platforms("webdriver");
         let json = match json_response {
             Ok(json) => json,
-            Err(e) => panic!(e)
+            Err(e) => panic!("{}",e)
         };
         assert!(json.contains("api_name"));
     }
@@ -542,7 +596,7 @@ mod tests {
         let json_response = api_client::get_tunnel("asdf");
         let json = match json_response {
             Ok(json) => json,
-            Err(e) => panic!(e)
+            Err(e) => panic!("{}",e)
         };
         assert!(json.contains("Tunnel not found"));
     }
@@ -552,7 +606,7 @@ mod tests {
         let json_response = api_client::get_tunnel_jobs("asdf");
         let json = match json_response {
             Ok(json) => json,
-            Err(e) => panic!(e)
+            Err(e) => panic!("{}",e)
         };
         assert!(json.contains("Not Found"));
     }
@@ -562,7 +616,7 @@ mod tests {
         let json_response = api_client::get_tunnels();
         let json = match json_response {
             Ok(json) => json,
-            Err(e) => panic!(e)
+            Err(e) => panic!("{}",e)
         };
         assert!(json.contains("[]"));
     }
@@ -572,7 +626,7 @@ mod tests {
         let json_response = api_client::post_upload("uploader.tst");
         let json_string = match json_response {
             Ok(json) => json,
-            Err(e) => panic!(e)
+            Err(e) => panic!("{}",e)
         };
 
         assert!(json_string.contains(r#""filename":"uploader.tst""#));
@@ -583,7 +637,7 @@ mod tests {
         let json_response = api_client::get_uploads();
         let json_string = match json_response {
             Ok(json) => json,
-            Err(e) => panic!(e)
+            Err(e) => panic!("{}",e)
         };
         // check for what should be the beginning of the response
         assert!(json_string.contains(r#"{"files":[{""#));
@@ -594,7 +648,7 @@ mod tests {
         let json_response = api_client::get_job("1");
         let json_string = match json_response {
             Ok(json) => json,
-            Err(e) => panic!(e)
+            Err(e) => panic!("{}",e)
         };
         // we checked for a nonexistent job id, we should get a 'failure' message from the API
         assert!(json_string.contains("Not found"));
@@ -605,7 +659,7 @@ mod tests {
         let json_response = api_client::get_jobs("1");
         let json_string = match json_response {
             Ok(json) => json,
-            Err(e) => panic!(e)
+            Err(e) => panic!("{}",e)
         };
         // check for what should be the beginning of the response
         // is there a better way to test this while not knowing if any jobs will be running (empty array [] or json objects in the array?)
@@ -617,7 +671,7 @@ mod tests {
         let json_response = api_client::stop_job("1");
         let json_string = match json_response {
             Ok(json) => json,
-            Err(e) => panic!(e)
+            Err(e) => panic!("{}",e)
         };
         // we tried to stop a nonexistent job id, we should get a 'failure' message from the API
         assert!(json_string.contains("Not found"));
@@ -628,7 +682,7 @@ mod tests {
         let json_response = api_client::get_job_asset_list("1");
         let json_string = match json_response {
             Ok(json) => json,
-            Err(e) => panic!(e)
+            Err(e) => panic!("{}",e)
         };
         // we tried to get a list from a nonexistent job id, we should get a 'failure' message from the API
         assert!(json_string.contains("Not found"));
