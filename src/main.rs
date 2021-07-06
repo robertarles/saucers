@@ -12,8 +12,8 @@ fn main() {
     let matches = App::new("saucers")
         .version("0.9")
         .about("\nSaucelabs api util.\nIMPORTANT: This program expects you to have already set your saucelabs credentials in the environment variables SAUCE_USERNAME and SAUCE_ACCESS_KEY (e.g in your .bashrc or .zshrc, or Windows system properties)")
-        .subcommand(SubCommand::with_name("apistatus")
-            .about("Get the current saucelabs API status.")
+        .subcommand(SubCommand::with_name("config")
+            .about("Get tool config.")
             .arg(Arg::with_name("formatted")
                 .short("o")
                 .takes_value(true)
@@ -21,8 +21,8 @@ fn main() {
                 .help("Request output in columnar format, requires field names to include in table (e.g. \"id,status,passed\")")
             )
         )
-        .subcommand(SubCommand::with_name("config")
-            .about("Get tool config.")
+        .subcommand(SubCommand::with_name("apistatus")
+            .about("Get the current saucelabs API status.")
             .arg(Arg::with_name("formatted")
                 .short("o")
                 .takes_value(true)
@@ -608,7 +608,8 @@ mod tests {
             Ok(json) => json,
             Err(e) => panic!("{}",e)
         };
-        assert!(json.contains("Not Found"));
+        println!("{}", json);
+        assert!(json.contains("500: Internal Server Error"));
     }
 
     #[test]
