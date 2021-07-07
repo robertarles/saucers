@@ -2,21 +2,22 @@ use std::env;
 use std::fs::File;
 use std::path::Path;
 use std::time::Duration;
+use colored::Colorize;
 
 extern crate reqwest;
 extern crate serde;
 extern crate serde_json;
 
-static SAUCE_API_URL: &'static str = "https://saucelabs.com/rest/v1/";
-static API_STATUS_PATH: &'static str = "info/status";
-static GET_JOBS_PATH: &'static str = "jobs";
-static GET_JOB_PATH: &'static str = "jobs";
-static STOP_JOB_PATH: &'static str = "{{USERNAME}}/jobs/{{JOB_ID}}/stop";
-static UPLOADS_PATH: &'static str = "storage";
-static TUNNELS_PATH: &'static str = "{{USERNAME}}/tunnels";
-static TUNNEL_JOB_PATH: &'static str = "{{USERNAME}}/tunnels/{{TUNNEL_ID}}/";
-static TUNNEL_JOBS_PATH: &'static str = "{{USERNAME}}/tunnels/{{TUNNEL_ID}}/num_jobs";
-static SUPPORTED_PLATFORMS_PATH: &'static str = "info/platforms/{{AUTOMATION_API}}";
+static SAUCE_API_URL: &str = "https://saucelabs.com/rest/v1/";
+static API_STATUS_PATH: &str = "info/status";
+static GET_JOBS_PATH: &str = "jobs";
+static GET_JOB_PATH: &str = "jobs";
+static STOP_JOB_PATH: &str = "{{USERNAME}}/jobs/{{JOB_ID}}/stop";
+static UPLOADS_PATH: &str = "storage";
+static TUNNELS_PATH: &str = "{{USERNAME}}/tunnels";
+static TUNNEL_JOB_PATH: &str = "{{USERNAME}}/tunnels/{{TUNNEL_ID}}/";
+static TUNNEL_JOBS_PATH: &str = "{{USERNAME}}/tunnels/{{TUNNEL_ID}}/num_jobs";
+static SUPPORTED_PLATFORMS_PATH: &str = "info/platforms/{{AUTOMATION_API}}";
 
 /**
  * returns the "healthcheck" api status from Saucelabs API
@@ -60,7 +61,7 @@ pub fn get_tunnels() -> Result<String, reqwest::Error> {
             &SAUCE_API_URL,
             &TUNNELS_PATH.replace("{{USERNAME}}", &sauce_username)
         ))
-        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .basic_auth(sauce_username, Some(sauce_access_key))
         .timeout(Duration::from_secs(120))
         .send()?
         .text()?;
@@ -80,7 +81,7 @@ pub fn get_tunnel(tunnel_id: &str) -> Result<String, reqwest::Error> {
                 .replace("{{USERNAME}}", &sauce_username)
                 .replace("{{TUNNEL_ID}}", tunnel_id)
         ))
-        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .basic_auth(sauce_username, Some(sauce_access_key))
         .timeout(Duration::from_secs(120))
         .send()?
         .text()?;
@@ -99,7 +100,7 @@ pub fn get_tunnel_jobs(tunnel_id: &str) -> Result<String, reqwest::Error> {
                 .replace("{{USERNAME}}", &sauce_username)
                 .replace("{{TUNNEL_ID}}", tunnel_id)
         ))
-        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .basic_auth(sauce_username, Some(sauce_access_key))
         .timeout(Duration::from_secs(120))
         .send()?
         .text()?;
@@ -119,7 +120,7 @@ pub fn post_upload(filename: &str) -> Result<String, reqwest::Error> {
             "{}{}/{}/{}?overwrite=true",
             &SAUCE_API_URL, &UPLOADS_PATH, &sauce_username, &file_name
         ))
-        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .basic_auth(sauce_username, Some(sauce_access_key))
         .timeout(Duration::from_secs(120))
         .body(file)
         .send()?
@@ -136,7 +137,7 @@ pub fn get_uploads() -> Result<String, reqwest::Error> {
             "{}{}/{}",
             &SAUCE_API_URL, &UPLOADS_PATH, &sauce_username
         ))
-        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .basic_auth(sauce_username, Some(sauce_access_key))
         .timeout(Duration::from_secs(120))
         .send()?
         .text()?;
@@ -156,7 +157,7 @@ pub fn get_jobs(max: &str) -> Result<String, reqwest::Error> {
             "{}{}{}",
             &SAUCE_API_URL, &GET_JOBS_PATH, &jobs_params
         ))
-        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .basic_auth(sauce_username, Some(sauce_access_key))
         .timeout(Duration::from_secs(120))
         .send()?
         .text()?;
@@ -172,7 +173,7 @@ pub fn get_job(job_id: &str) -> Result<String, reqwest::Error> {
     let client = reqwest::blocking::Client::new();
     let body = client
         .get(&format!("{}{}/{}", &SAUCE_API_URL, &GET_JOB_PATH, &job_id))
-        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .basic_auth(sauce_username, Some(sauce_access_key))
         .timeout(Duration::from_secs(120))
         .send()?
         .text()?;
@@ -194,7 +195,7 @@ pub fn stop_job(job_id: &str) -> Result<String, reqwest::Error> {
                 .replace("{{USERNAME}}", &sauce_username)
                 .replace("{{JOB_ID}}", &job_id)
         ))
-        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .basic_auth(sauce_username, Some(sauce_access_key))
         .timeout(Duration::from_secs(120))
         .send()?
         .text()?;
@@ -215,12 +216,11 @@ pub fn get_job_asset_file(job_id: &str, asset_filename: &str) -> String {
             "{}{}/jobs/{}/assets/{}",
             &SAUCE_API_URL, &sauce_username, &job_id, &asset_filename
         ))
-        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .basic_auth(sauce_username, Some(sauce_access_key))
         .timeout(Duration::from_secs(120))
         .send()
         .unwrap();
-    let body = resp.text().unwrap();
-    body
+    resp.text().unwrap()
 }
 
 /**
@@ -234,7 +234,7 @@ pub fn get_job_asset_list(job_id: &str) -> Result<String, reqwest::Error> {
             "{}{}/jobs/{}/assets",
             &SAUCE_API_URL, &sauce_username, &job_id
         ))
-        .basic_auth(sauce_username.clone(), Some(sauce_access_key.clone()))
+        .basic_auth(sauce_username, Some(sauce_access_key))
         .timeout(Duration::from_secs(120))
         .send()?
         .text()?;
@@ -249,7 +249,7 @@ fn load_sauce_credentials() -> (String, String) {
     match env::var("SAUCE_USERNAME") {
         Ok(v) => sauce_username = (*v).to_string(),
         Err(e) => {
-            println!("Error reading SAUCE_USERNAME: {}", e);
+            eprintln!("{} {}", "SAUCE_USERNAME:".red().bold(), e);
             std::process::exit(1);
         }
     }
@@ -258,7 +258,7 @@ fn load_sauce_credentials() -> (String, String) {
     match env::var("SAUCE_ACCESS_KEY") {
         Ok(v) => sauce_access_key = (*v).to_string(),
         Err(e) => {
-            println!("Error reading SAUCE_ACCESS_KEY: {}", e);
+            eprintln!("{} {}", "SAUCE_ACCESS_KEY:".red().bold(), e);
             std::process::exit(1);
         }
     }

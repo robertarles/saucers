@@ -1,4 +1,5 @@
 mod api_client;
+use colored::Colorize;
 use serde_json::json;
 use std::collections::HashMap;
 use std::env;
@@ -9,7 +10,7 @@ use clap::{App, Arg, SubCommand};
 fn main() {
     // handle the CLI args
     let matches = App::new("saucers")
-        .version("0.9")
+        .version("0.2")
         .about("\nSaucelabs api util.\nIMPORTANT: This program expects you to have already set your saucelabs credentials in the environment variables SAUCE_USERNAME and SAUCE_ACCESS_KEY (e.g in your .bashrc or .zshrc, or Windows system properties)")
         .subcommand(SubCommand::with_name("config")
             .about("Get tool config.")
@@ -243,7 +244,7 @@ fn call_get_config(job_args: &clap::ArgMatches) {
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ", "");
-        let format_fields = format_fields_string_cleaned.split(",").collect();
+        let format_fields = format_fields_string_cleaned.split(',').collect();
         print_formatted_jsonstring(&json_string, format_fields);
     } else {
         println!("{}", json_string);
@@ -260,7 +261,7 @@ fn call_post_upload(job_args: &clap::ArgMatches) {
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ", "");
-        let format_fields = format_fields_string_cleaned.split(",").collect();
+        let format_fields = format_fields_string_cleaned.split(',').collect();
         print_formatted_jsonstring(&json_string, format_fields);
     } else {
         println!("{}", json_string);
@@ -276,7 +277,7 @@ fn call_get_api_status(job_args: &clap::ArgMatches) {
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ", "");
-        let format_fields = format_fields_string_cleaned.split(",").collect();
+        let format_fields = format_fields_string_cleaned.split(',').collect();
         print_formatted_jsonstring(&json_string, format_fields);
     } else {
         println!("{}", json_string);
@@ -293,7 +294,7 @@ fn call_get_supported_platforms(job_args: &clap::ArgMatches) {
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ", "");
-        let format_fields = format_fields_string_cleaned.split(",").collect();
+        let format_fields = format_fields_string_cleaned.split(',').collect();
         print_formatted_jsonstring(&json_string, format_fields);
     } else {
         println!("{}", json_string);
@@ -309,7 +310,7 @@ fn call_get_tunnels(job_args: &clap::ArgMatches) {
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ", "");
-        let format_fields = format_fields_string_cleaned.split(",").collect();
+        let format_fields = format_fields_string_cleaned.split(',').collect();
         print_formatted_jsonstring(&json_string, format_fields);
     } else {
         println!("{}", json_string);
@@ -326,7 +327,7 @@ fn call_get_tunnel(job_args: &clap::ArgMatches) {
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ", "");
-        let format_fields = format_fields_string_cleaned.split(",").collect();
+        let format_fields = format_fields_string_cleaned.split(',').collect();
         print_formatted_jsonstring(&json_string, format_fields);
     } else {
         println!("{}", json_string);
@@ -343,7 +344,7 @@ fn call_get_tunnel_jobs(job_args: &clap::ArgMatches) {
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ", "");
-        let format_fields = format_fields_string_cleaned.split(",").collect();
+        let format_fields = format_fields_string_cleaned.split(',').collect();
         print_formatted_jsonstring(&json_string, format_fields);
     } else {
         println!("{}", json_string);
@@ -359,7 +360,7 @@ fn call_get_uploads(job_args: &clap::ArgMatches) {
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ", "");
-        let format_fields = format_fields_string_cleaned.split(",").collect();
+        let format_fields = format_fields_string_cleaned.split(',').collect();
         // get serde_json value of the string, extract the array (below), convert to string? and pretty print the file array
         let json_object: serde_json::Value = serde_json::from_str(&&json_string[..]).unwrap();
         let json_files_array = json_object.get("files").unwrap();
@@ -384,7 +385,7 @@ fn call_get_jobs(job_args: &clap::ArgMatches) {
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ", "");
-        let format_fields = format_fields_string_cleaned.split(",").collect();
+        let format_fields = format_fields_string_cleaned.split(',').collect();
         print_formatted_jsonstring(&json_string, format_fields);
     } else {
         println!("{}", json_string);
@@ -393,7 +394,7 @@ fn call_get_jobs(job_args: &clap::ArgMatches) {
 
 fn call_get_job(job_args: &clap::ArgMatches) {
     let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
-    let json_response = api_client::get_job(&job_id[..]);
+    let json_response = api_client::get_job(&job_id);
     let json_string = match json_response {
         Ok(json_string) => json_string,
         Err(e) => panic!("{}", e),
@@ -401,7 +402,7 @@ fn call_get_job(job_args: &clap::ArgMatches) {
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ", "");
-        let format_fields = format_fields_string_cleaned.split(",").collect();
+        let format_fields = format_fields_string_cleaned.split(',').collect();
         print_formatted_jsonstring(&json_string, format_fields);
     } else {
         println!("{}", json_string);
@@ -410,7 +411,7 @@ fn call_get_job(job_args: &clap::ArgMatches) {
 
 fn call_stop_job(job_args: &clap::ArgMatches) {
     let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
-    let json_response = api_client::stop_job(&job_id[..]);
+    let json_response = api_client::stop_job(&job_id);
     let json_string = match json_response {
         Ok(json_string) => json_string,
         Err(e) => panic!("{}", e),
@@ -419,7 +420,7 @@ fn call_stop_job(job_args: &clap::ArgMatches) {
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ", "");
-        let format_fields = format_fields_string_cleaned.split(",").collect();
+        let format_fields = format_fields_string_cleaned.split(',').collect();
         print_formatted_jsonstring(&json_string, format_fields);
     } else {
         println!("{}", json_string);
@@ -429,13 +430,13 @@ fn call_stop_job(job_args: &clap::ArgMatches) {
 fn call_get_job_asset_file(job_args: &clap::ArgMatches) {
     let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
     let asset_filename = job_args.value_of("filename").unwrap(); // required arg, safe to simply unwrap
-    let text_response = api_client::get_job_asset_file(&job_id[..], &asset_filename[..]);
+    let text_response = api_client::get_job_asset_file(&job_id, &asset_filename);
     println!("{}", text_response);
 }
 
 fn call_get_job_asset_list(job_args: &clap::ArgMatches) {
     let job_id = job_args.value_of("id").unwrap(); // required arg, safe to simply unwrap
-    let json_response = api_client::get_job_asset_list(&job_id[..]);
+    let json_response = api_client::get_job_asset_list(&job_id);
     let json_string = match json_response {
         Ok(json_string) => json_string,
         Err(e) => panic!("{}", e),
@@ -443,7 +444,7 @@ fn call_get_job_asset_list(job_args: &clap::ArgMatches) {
     if job_args.is_present("formatted") {
         let format_fields_string = job_args.value_of("formatted").unwrap();
         let format_fields_string_cleaned = format_fields_string.replace(" ", "");
-        let format_fields = format_fields_string_cleaned.split(",").collect();
+        let format_fields = format_fields_string_cleaned.split(',').collect();
         print_formatted_jsonstring(&json_string, format_fields);
     } else {
         println!("{}", json_string);
@@ -562,7 +563,7 @@ fn load_sauce_credentials() -> (String, String) {
     match env::var("SAUCE_USERNAME") {
         Ok(v) => sauce_username = (*v).to_string(),
         Err(e) => {
-            println!("Error reading SAUCE_USERNAME: {}", e);
+            eprintln!("{} {}", "SAUCE_USERNAME:".red().bold(), e);
             std::process::exit(1);
         }
     }
@@ -571,7 +572,7 @@ fn load_sauce_credentials() -> (String, String) {
     match env::var("SAUCE_ACCESS_KEY") {
         Ok(v) => sauce_access_key = (*v).to_string(),
         Err(e) => {
-            println!("Error reading SAUCE_ACCESS_KEY: {}", e);
+            eprintln!("{} {}", "SAUCE_ACCESS_KEY:".red().bold(), e);
             std::process::exit(1);
         }
     }
@@ -677,7 +678,7 @@ mod tests {
         };
         // check for what should be the beginning of the response
         // is there a better way to test this while not knowing if any jobs will be running (empty array [] or json objects in the array?)
-        assert!(json_string.starts_with("["));
+        assert!(json_string.starts_with('['));
     }
 
     #[test]
