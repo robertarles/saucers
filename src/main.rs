@@ -622,7 +622,7 @@ mod tests {
             Ok(json) => json,
             Err(e) => panic!("{}", e),
         };
-        println!("{}", json);
+        // expecting a 500 failure from saucelabs, not tunnels configured for test builds
         assert!(json.contains("500: Internal Server Error"));
     }
 
