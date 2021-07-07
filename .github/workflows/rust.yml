@@ -2,6 +2,8 @@ on: [push, pull_request]
 
 env:
   CARGO_TERM_COLOR: always
+  SAUCE_USERNAME: ?{{secrets.SAUCE_USERNAME}}
+  SAUCE_ACCESS_KEY: ?{{secrets.SAUCE_ACCESS_KEY}}
   
 name: Rust Continuous integration
 
