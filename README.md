@@ -2,7 +2,7 @@
 
 A command line utility to interface with the saucelabs API.
 
-It is expected that you already have the environment variables SAUCE_USERNAME and SAUCE_ACCESS_KEY set in your command line environment. 
+It is expected that you already have the environment variables SAUCE_USERNAME and SAUCE_ACCESS_KEY set in your command line environment.
 
 For Mac and Linux, you probably want to set these variables in your .bashrc or .zshrc.
 
@@ -10,14 +10,14 @@ For Windows, this can be set in Start | System Information | System Properties |
 
 Your 'username' and 'access_key' can be found here [https://app.saucelabs.com/user-settings](https://app.saucelabs.com/user-settings)
 
-*Note:* If you have node/npm installed, check out Saucelabs own https://www.npmjs.com/package/saucelabs, it's a complete API client implementation.
+*Note:* If you have node/npm installed, check out Saucelabs own <https://www.npmjs.com/package/saucelabs>, it's a complete API client implementation.
 
 ## Help
 
 `saucers --help`
 
 ```text
-saucers 0.9
+saucers 0.2
 
 Saucelabs api util.
 IMPORTANT: This program expects you to have already set your saucelabs credentials in the environment variables
@@ -79,7 +79,6 @@ Android_20200219.3.apk   108227749
 Android_20200220.2.apk   134294213
 Android_20200214.1.apk   131756509
 ```
-
 
 ## Downloads
 
