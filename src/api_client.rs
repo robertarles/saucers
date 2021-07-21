@@ -1,8 +1,8 @@
+use colored::Colorize;
 use std::env;
 use std::fs::File;
 use std::path::Path;
 use std::time::Duration;
-use colored::Colorize;
 
 extern crate reqwest;
 extern crate serde;
