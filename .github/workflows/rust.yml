@@ -2,6 +2,8 @@ on: [push, pull_request]
 
 env:
   CARGO_TERM_COLOR: always
+  SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+  SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
   
 name: Rust Continuous integration
 
@@ -16,9 +18,6 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-        env:
-          SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
-          SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
       - uses: actions-rs/cargo@v1
         with:
           command: check
