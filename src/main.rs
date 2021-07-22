@@ -636,6 +636,7 @@ mod tests {
         assert!(json.contains("[]"));
     }
 
+    /* TODO: add this test back, get it working on github actions!!! */
     #[test]
     fn test_post_upload() {
         let json_response = api_client::post_upload("uploader.tst");

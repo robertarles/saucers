@@ -88,6 +88,7 @@ pub fn get_tunnel(tunnel_id: &str) -> Result<String, reqwest::Error> {
 
     Ok(body)
 }
+
 pub fn get_tunnel_jobs(tunnel_id: &str) -> Result<String, reqwest::Error> {
     let (sauce_username, sauce_access_key) = load_sauce_credentials();
 
