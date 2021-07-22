@@ -636,7 +636,6 @@ mod tests {
         assert!(json.contains("[]"));
     }
 
-    /* TODO: add this test back, get it working on github actions!!! */
     #[test]
     fn test_post_upload() {
         let json_response = api_client::post_upload("uploader.tst");
@@ -655,7 +654,6 @@ mod tests {
             Ok(json) => json,
             Err(e) => panic!("{}", e),
         };
-        println!("[DEBUG] TODO: REMOVE json_string [{:#?}]", json_string);
         // check for what should be the beginning of the response
         assert!(json_string.contains(r#"{"files":[{""#));
     }
