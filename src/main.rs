@@ -654,6 +654,7 @@ mod tests {
             Ok(json) => json,
             Err(e) => panic!("{}", e),
         };
+        println!("[DEBUG] TODO: REMOVE json_string [{:#?}]", json_string);
         // check for what should be the beginning of the response
         assert!(json_string.contains(r#"{"files":[{""#));
     }
