@@ -21,6 +21,8 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: check
+          
+          
 
   test:
     name: Test Suite
@@ -77,13 +79,25 @@ jobs:
         with:
           toolchain: stable
       - run: cargo build --release --all-features
-      
-  build_and_test_macos:
-    name: Rust macos project
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - name: version
+        run: echo "::set-output name=version::$(./target/release/saucers --version | sed 's/saucers //')"
+        id: version
+      - name: release
+        uses: actions/create-release@v1
+        id: create_release
         with:
-          toolchain: stable
-      - run: cargo build --release --all-features
+          draft: true
+          prerelease: false
+          release_name: ${{ steps.version.outputs.version }}
+          tag_name: ${{ github.ref }}
+          body_path: README.md
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: upload linux artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./target/release/saucers
+          asset_name: saucers
