@@ -82,10 +82,4 @@ Android_20200214.1.apk   131756509
 
 ## Downloads
 
-Mac and Linux downloads, don't forget you have to do a `chmod +x {path}/{to}/saucers` to make it executable
-
-[MacOS](https://github.com/robertarles/saucers/raw/master/bin/macos/saucers)
-
-[linux](https://github.com/robertarles/saucers/raw/master/bin/linux/saucers)
-
-[windows](https://github.com/robertarles/saucers/raw/master/bin/windows/saucers.exe)
+[Releases](https://github.com/robertarles/saucers/releases)
