@@ -85,8 +85,8 @@ jobs:
         uses: actions/create-release@v1
         id: create_release
         with:
-          draft: true
-          prerelease: false
+          draft: false
+          prerelease: true
           release_name: ${{ steps.version.outputs.version }}
           tag_name: ${{ github.ref }}
           body_path: README.md
